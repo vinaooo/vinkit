@@ -3,4 +3,6 @@
 jdk:
   - openjdk21
 install:
-  - ./gradlew publishToMavenLocal --no-configuration-cache
+  # ponytail: JitPack sometimes can't open gradle-wrapper.jar on a fresh checkout (0.0.1, 0.2.0); one retry after a
+  # pause has always been enough. If it keeps failing, regenerate the wrapper in before_install instead.
+  - ./gradlew publishToMavenLocal --no-configuration-cache || (sleep 15 && ./gradlew publishToMavenLocal --no-configuration-cache)
