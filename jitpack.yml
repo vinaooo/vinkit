@@ -1,8 +1,8 @@
 # JitPack builds a tag with this and serves com.github.vinaooo.vinkit:<module>:<tag>.
 # Its image already has the Android SDK; AGP downloads a missing platform itself.
-jdk:
-  - openjdk21
+# Its openjdk21 is 21.0.2, which can't read the Gradle 9.8 wrapper jar (entries dated 1970): Temurin instead. Each
+# line runs in its own shell, so the JDK switch and the build share one.
+before_install:
+  - sdk install java 21.0.12+1.1-tem < /dev/null
 install:
-  # ponytail: JitPack sometimes can't open gradle-wrapper.jar on a fresh checkout (0.0.1, 0.2.0); one retry after a
-  # pause has always been enough. If it keeps failing, regenerate the wrapper in before_install instead.
-  - ./gradlew publishToMavenLocal --no-configuration-cache || (sleep 15 && ./gradlew publishToMavenLocal --no-configuration-cache)
+  - sdk use java 21.0.12+1.1-tem && java -version && ./gradlew publishToMavenLocal --no-configuration-cache
