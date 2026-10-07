@@ -30,7 +30,7 @@ class ScoresScreenTest {
                 uiState = state,
                 onBack = {},
                 modeName = { it.lowercase() },
-                onSelectMode = onSelect,
+                onSelectGroup = onSelect,
                 details = { "${it.extras["mistakes"]} mistakes" },
                 ranked = ranked,
             )
@@ -42,11 +42,26 @@ class ScoresScreenTest {
         var chosen: String? = null
         show(
             ScoresUiState(
-                scores = listOf(ScoreRecord("EASY", 900, 65, 0, mapOf("mistakes" to "2"))),
-                stats = GameStats(played = 4, won = 3),
                 isLoading = false,
-                modes = listOf("EASY", "HARD"),
-                mode = "EASY",
+                groups = listOf("EASY", "HARD"),
+                group = "EASY",
+                sections = listOf(
+                    ModeSection(
+                        "EASY",
+                        GameStats(played = 4, won = 3),
+                        listOf(
+                            ScoreRecord(
+                                "EASY",
+                                900,
+                                65,
+                                0,
+                                mapOf(
+                                    "mistakes" to "2",
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
             ),
         ) { chosen = it }
         compose.onNodeWithText("900").assertExists()
@@ -59,7 +74,14 @@ class ScoresScreenTest {
 
     @Test
     fun `a mode played but never won says how to get scores`() {
-        show(ScoresUiState(isLoading = false, modes = listOf("EASY"), mode = "EASY", stats = GameStats(played = 1)))
+        show(
+            ScoresUiState(
+                isLoading = false,
+                groups = listOf("EASY"),
+                group = "EASY",
+                sections = listOf(ModeSection("EASY", GameStats(played = 1))),
+            ),
+        )
         compose.onNodeWithText("easy").assertExists()
         compose.onNodeWithText("Win a game to see your scores here.").assertExists()
     }
@@ -67,9 +89,19 @@ class ScoresScreenTest {
     @Test
     fun `a game without scores shows the stats alone, with draws and losses`() {
         show(
-            ScoresUiState(isLoading = false, modes = listOf("EASY"), mode = "EASY", stats = GameStats(5, 2, 0, 1, 1)),
+            ScoresUiState(
+                isLoading = false,
+                groups = listOf("3×3"),
+                group = "3×3",
+                sections = listOf(
+                    ModeSection("EASY", GameStats(5, 2, 0, 1, 1)),
+                    ModeSection("HARD", GameStats(played = 3)),
+                ),
+            ),
             ranked = false,
         )
+        // A section per mode, each named: "easy" and "hard".
+        compose.onNodeWithText("hard").assertExists()
         compose.onNodeWithContentDescription("Draws, 1").assertExists()
         compose.onNodeWithContentDescription("Losses, 2").assertExists()
         compose.onNodeWithText("Win a game to see your scores here.").assertDoesNotExist()

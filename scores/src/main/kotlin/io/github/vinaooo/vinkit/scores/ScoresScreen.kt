@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -41,9 +43,10 @@ import java.text.DateFormat
 import java.util.Date
 
 /**
- * A tab per mode played (a title instead for a single one), its stats and its top 10. [modeName] names a mode;
- * [details] is what the game shows under a score ("No mistakes · 2 hints"); the date follows it. A game without
- * scores (only wins, losses and draws) passes `ranked = false`: the stats alone, with draws.
+ * A tab per group played (a title instead for a single one), and in it a section per mode: its name (when the tab
+ * holds several), its stats and its top 10. [groupName] names a tab, [modeName] a mode; [details] is what the game
+ * shows under a score ("No mistakes · 2 hints"); the date follows it. A game without scores (only wins, losses and
+ * draws) passes `ranked = false`: the stats alone, with draws.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,7 +55,8 @@ fun ScoresScreen(
     onBack: () -> Unit,
     modeName: @Composable (String) -> String,
     modifier: Modifier = Modifier,
-    onSelectMode: (String) -> Unit = {},
+    groupName: @Composable (String) -> String = modeName,
+    onSelectGroup: (String) -> Unit = {},
     details: @Composable (ScoreRecord) -> String? = { null },
     ranked: Boolean = true,
 ) {
@@ -76,34 +80,63 @@ fun ScoresScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            if (uiState.modes.size > 1) {
-                item {
-                    PrimaryScrollableTabRow(
-                        selectedTabIndex = uiState.modes.indexOf(uiState.mode).coerceAtLeast(0),
-                        edgePadding = 0.dp,
-                    ) {
-                        uiState.modes.forEach { mode ->
-                            Tab(
-                                selected = mode == uiState.mode,
-                                onClick = { onSelectMode(mode) },
-                                text = { Text(modeName(mode)) },
-                            )
-                        }
-                    }
-                }
-            } else {
-                uiState.mode?.let { item { Text(modeName(it), style = MaterialTheme.typography.titleMedium) } }
-            }
-            if (uiState.mode != null) item { StatsCard(uiState.stats, withDraws = !ranked) }
-            if (ranked && !uiState.isLoading && uiState.scores.isEmpty()) {
-                item {
-                    Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                        Text(stringResource(R.string.vinkit_no_scores), style = MaterialTheme.typography.bodyLarge)
-                    }
-                }
-            }
-            itemsIndexed(uiState.scores) { index, record -> ScoreRow(index + 1, record, details(record)) }
+            tabs(uiState, groupName, onSelectGroup)
+            sections(uiState, modeName, details, ranked)
         }
+    }
+}
+
+private fun LazyListScope.tabs(
+    uiState: ScoresUiState,
+    groupName: @Composable (String) -> String,
+    onSelectGroup: (String) -> Unit,
+) {
+    if (uiState.groups.size > 1) {
+        item {
+            PrimaryScrollableTabRow(
+                selectedTabIndex = uiState.groups.indexOf(uiState.group).coerceAtLeast(0),
+                edgePadding = 0.dp,
+            ) {
+                uiState.groups.forEach { group ->
+                    Tab(selected = group == uiState.group, onClick = {
+                        onSelectGroup(group)
+                    }, text = { Text(groupName(group)) })
+                }
+            }
+        }
+    } else {
+        uiState.group?.let { item { Text(groupName(it), style = MaterialTheme.typography.titleMedium) } }
+    }
+}
+
+/** Each mode of the tab: its name when the tab holds several, its stats, and its scores when [ranked]. */
+private fun LazyListScope.sections(
+    uiState: ScoresUiState,
+    modeName: @Composable (String) -> String,
+    details: @Composable (ScoreRecord) -> String?,
+    ranked: Boolean,
+) {
+    val titled = uiState.sections.size > 1
+    uiState.sections.forEach { section ->
+        if (titled) {
+            item(key = "title ${section.mode}") {
+                Text(
+                    modeName(section.mode),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 8.dp).semantics { heading() },
+                )
+            }
+        }
+        item(key = "stats ${section.mode}") { StatsCard(section.stats, withDraws = !ranked) }
+        if (ranked && !uiState.isLoading && section.scores.isEmpty()) {
+            item(key = "empty ${section.mode}") {
+                Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                    Text(stringResource(R.string.vinkit_no_scores), style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+        }
+        if (ranked) itemsIndexed(section.scores) { index, record -> ScoreRow(index + 1, record, details(record)) }
     }
 }
 

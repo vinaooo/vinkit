@@ -19,14 +19,14 @@ takes only what it uses.
 | `designsystem` | `VinkitTheme` (Material 3 Expressive, dynamic color or one of 8 palettes), `ColorChoice`, `spokenElapsed` | done |
 | `ads` | `AdMobBanner` in its `BannerSlot`, UMP consent before the SDK starts (`DefaultAdConsent`) | done |
 | `settings` | `DataStoreAppSettingsRepository`, `SettingsScreen(gameSections = …)`, rows (`Choice`, `IconChoice`, `ToggleRow`, `LinkRow`), `NewGameConfirmDialog(text)` | done |
-| `scores` | `ScoresDatabase` (Room, `vinkit_scores.db`), `RoomScoreRepository`/`RoomStatsRepository`, open `ScoresViewModel`, `ScoresScreen` (`ranked = false`: stats with draws, no scores) | done |
+| `scores` | `ScoresDatabase` (Room, `vinkit_scores.db`), `RoomScoreRepository`/`RoomStatsRepository`, open `ScoresViewModel` (`groupOf`: modes grouped into tabs, a section per mode), `ScoresScreen` (`ranked = false`: stats with draws, no scores) | done |
 | `bugreport` | `BugReportDialog`: email with screenshot and files, or a prefilled GitHub issue | done |
 | `shell` | `GameSurface` (screenshot + bug report + announcer), `GameFrame` (portrait/landscape/phone view, hand), `GameToolbar(actions, menuOptions)`, `WinDialog(lines)`, `ModeAndTime`, `Ticker`, `AndroidGameFeedback` | done |
 
 ## Using it in a game
 
 Games always build against a published release from JitPack, never a local copy of vinkit. `gradle.properties` holds
-the newest tag (`vinkit.tag=0.3.3`); every vinkit release is followed by bumping it in each game. `settings.gradle.kts`:
+the newest tag (`vinkit.tag=0.4.0`); every vinkit release is followed by bumping it in each game. `settings.gradle.kts`:
 
 ```kotlin
 val vinkitTag = providers.gradleProperty("vinkit.tag").get()

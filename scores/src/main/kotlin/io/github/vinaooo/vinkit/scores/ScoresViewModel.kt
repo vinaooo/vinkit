@@ -16,47 +16,62 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
-data class ScoresUiState(
-    val scores: List<ScoreRecord> = emptyList(),
+/** One mode in the chosen tab: its stats and its top scores. */
+data class ModeSection(
+    val mode: String,
     val stats: GameStats = GameStats(),
+    val scores: List<ScoreRecord> = emptyList(),
+)
+
+data class ScoresUiState(
     val isLoading: Boolean = true,
-    /** The modes played at least once, won or not, one tab each. */
-    val modes: List<String> = emptyList(),
-    /** The mode whose ranking shows; null before anything was played. */
-    val mode: String? = null,
+    /** The tabs: groups with at least one mode played, won or not. */
+    val groups: List<String> = emptyList(),
+    /** The chosen tab; null before anything was played. */
+    val group: String? = null,
+    /** Every mode of the chosen tab, in the game's order; one not played yet shows zeros. */
+    val sections: List<ModeSection> = emptyList(),
 )
 
 /**
- * The Scores screen's state. [modes] lists every mode the game knows, in tab order; a stored mode it doesn't list
- * (from a newer version) is skipped. [rankingFor] says how each mode ranks. Open, so a Hilt app can subclass it
- * with an `@HiltViewModel @Inject constructor`.
+ * The Scores screen's state. [modes] lists every mode the game knows, in order; a stored mode it doesn't list (from
+ * a newer version) is skipped. [groupOf] puts modes in tabs (each mode its own tab by default; OX Play: one tab per
+ * board, a section per opponent). [rankingFor] says how each mode ranks. Open, so a Hilt app can subclass it with an
+ * `@HiltViewModel @Inject constructor`.
  */
 open class ScoresViewModel(
     scores: ScoreRepository,
     stats: StatsRepository,
     modes: List<String>,
+    // Before rankingFor, so a caller's trailing lambda stays the ranking.
+    groupOf: (String) -> String = { it },
     rankingFor: (String) -> Ranking = { Ranking.HIGHEST_POINTS },
 ) : ViewModel() {
     private val chosen = MutableStateFlow<String?>(null)
 
-    // The chosen tab, or the first mode played until one is chosen.
+    // The chosen tab, or the first one until one is chosen.
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<ScoresUiState> =
         combine(stats.observePlayedModes(), chosen) { played, choice ->
-            val tabs = modes.filter { it in played }
+            val tabs = modes.filter { it in played }.map(groupOf).distinct()
             tabs to (choice?.takeIf { it in tabs } ?: tabs.firstOrNull())
-        }.flatMapLatest { (tabs, mode) ->
-            if (mode == null) {
+        }.flatMapLatest { (tabs, group) ->
+            if (group == null) {
                 flowOf(ScoresUiState(isLoading = false))
             } else {
-                combine(scores.observeTopScores(mode, rankingFor(mode)), stats.observe(mode)) { top, modeStats ->
-                    ScoresUiState(top, modeStats, isLoading = false, modes = tabs, mode = mode)
+                val sections = modes.filter { groupOf(it) == group }.map { mode ->
+                    combine(scores.observeTopScores(mode, rankingFor(mode)), stats.observe(mode)) { top, modeStats ->
+                        ModeSection(mode, modeStats, top)
+                    }
+                }
+                combine(sections) {
+                    ScoresUiState(isLoading = false, groups = tabs, group = group, sections = it.toList())
                 }
             }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), ScoresUiState())
 
-    fun selectMode(mode: String) {
-        chosen.value = mode
+    fun selectGroup(group: String) {
+        chosen.value = group
     }
 
     private companion object {

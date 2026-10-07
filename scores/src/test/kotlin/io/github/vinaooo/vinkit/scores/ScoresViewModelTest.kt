@@ -61,10 +61,11 @@ class ScoresViewModelTest {
         viewModel().uiState.test {
             awaitItem().isLoading shouldBe true
             val state = awaitItem()
-            state.modes shouldBe listOf("EASY", "HARD", "EXPERT")
-            state.mode shouldBe "EASY"
-            state.scores.map { it.points } shouldBe listOf(900, 700, 950)
-            state.stats.won shouldBe 3
+            state.groups shouldBe listOf("EASY", "HARD", "EXPERT")
+            state.group shouldBe "EASY"
+            val section = state.sections.single()
+            section.scores.map { it.points } shouldBe listOf(900, 700, 950)
+            section.stats.won shouldBe 3
         }
     }
 
@@ -73,11 +74,28 @@ class ScoresViewModelTest {
         val viewModel = viewModel()
         viewModel.uiState.test {
             skipItems(2)
-            viewModel.selectMode("EXPERT")
+            viewModel.selectGroup("EXPERT")
+            val section = awaitItem().sections.single()
+            section.mode shouldBe "EXPERT"
+            section.scores shouldBe emptyList()
+            section.stats.played shouldBe 1
+        }
+    }
+
+    @Test
+    fun `grouped modes share a tab, with a section per mode, played or not`() = runTest(dispatcher) {
+        // Two groups, "E" (EASY, EXPERT) and "H" (HARD, HYPER): HYPER was never played.
+        val grouped =
+            ScoresViewModel(scores, stats, listOf("EASY", "EXPERT", "HARD", "HYPER"), groupOf = { it.take(1) })
+        grouped.uiState.test {
+            skipItems(1)
             val state = awaitItem()
-            state.mode shouldBe "EXPERT"
-            state.scores shouldBe emptyList()
-            state.stats.played shouldBe 1
+            state.groups shouldBe listOf("E", "H")
+            state.sections.map { it.mode } shouldBe listOf("EASY", "EXPERT")
+            grouped.selectGroup("H")
+            val hard = awaitItem()
+            hard.sections.map { it.mode } shouldBe listOf("HARD", "HYPER")
+            hard.sections.last().stats shouldBe GameStats()
         }
     }
 }
