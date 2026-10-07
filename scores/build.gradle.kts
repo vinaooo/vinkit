@@ -18,7 +18,8 @@ ksp {
 dependencies {
     api(project(":core"))
     implementation(project(":designsystem"))
-    implementation(libs.androidx.room.runtime)
+    // ScoresDatabase is a RoomDatabase: apps that create it compile against Room.
+    api(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
