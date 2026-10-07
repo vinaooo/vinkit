@@ -26,7 +26,7 @@ takes only what it uses.
 ## Using it in a game
 
 Games always build against a published release from JitPack, never a local copy of vinkit. `gradle.properties` holds
-the newest tag (`vinkit.tag=0.4.0`); every vinkit release is followed by bumping it in each game. `settings.gradle.kts`:
+the newest tag (`vinkit.tag=0.4.1`); every vinkit release is followed by bumping it in each game. `settings.gradle.kts`:
 
 ```kotlin
 val vinkitTag = providers.gradleProperty("vinkit.tag").get()
@@ -112,5 +112,5 @@ Every resource is prefixed `vinkit_`, so an app can override a string by declari
 ./gradlew test detekt ktlintCheck publishToMavenLocal
 ```
 
-A release is a git tag; JitPack builds it with `jitpack.yml` on first request. Tags `0.0.1`, `0.2.0` and `0.2.1`
+A release is a git tag; JitPack builds it with `jitpack.yml` on first request. Tags `0.0.1`, `0.2.0`, `0.2.1` and `0.4.0`
 failed on JitPack (its JDK couldn't open the wrapper jar) and stay broken there: use `0.2.2` or later.

@@ -2,7 +2,8 @@
 # Its image already has the Android SDK; AGP downloads a missing platform itself.
 # Its openjdk21 is 21.0.2, which can't read the Gradle 9.8 wrapper jar (entries dated 1970): Temurin instead. Each
 # line runs in its own shell, so the JDK switch and the build share one.
+# The download sometimes fails ("Can not install … at this time", 0.4.0): try a few times.
 before_install:
-  - sdk install java 21.0.12+1.1-tem < /dev/null
+  - for i in 1 2 3 4 5; do sdk install java 21.0.12+1.1-tem < /dev/null && break; sleep 20; done
 install:
   - sdk use java 21.0.12+1.1-tem && java -version && ./gradlew publishToMavenLocal --no-configuration-cache
