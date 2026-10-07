@@ -25,4 +25,4 @@ play-service-account.json
 
 # Logs
 *.log
-.jitpack-jdk
+.jitpack-jdk/

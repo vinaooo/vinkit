@@ -1,9 +1,11 @@
 # JitPack builds a tag with this and serves com.github.vinaooo.vinkit:<module>:<tag>.
 # Its image already has the Android SDK; AGP downloads a missing platform itself.
-# Its openjdk21 is 21.0.2, which can't read the Gradle 9.8 wrapper jar (entries dated 1970); any 21 from 21.0.4 can.
-# sdkman's downloads fail at times for one vendor (0.4.0, 0.4.2): try several, keep the first that installs. Each line
-# runs in its own shell, so the chosen JDK goes through a file.
+# Its openjdk21 (21.0.2) can't read Gradle 9.8's jars (entries dated 1970); any 21 from 21.0.4 can. sdkman's JDK
+# downloads failed at times (0.4.0, 0.4.2, 0.4.3), so the latest Temurin 21 comes straight from Adoptium's API,
+# which serves the GitHub release. Each line runs in its own shell: the install line points JAVA_HOME at it.
+jdk:
+  - openjdk21
 before_install:
-  - for jdk in 21.0.12+1.1-tem 21.0.12+1-ms 21.0.4.0+7-amzn 21.0.12+1.1-librca 21.0.12+1-sapmchn; do sdk install java $jdk < /dev/null && echo $jdk > .jitpack-jdk && break; done; cat .jitpack-jdk
+  - mkdir -p .jitpack-jdk && curl -sSfL --retry 5 https://api.adoptium.net/v3/binary/latest/21/ga/linux/x64/jdk/hotspot/normal/eclipse | tar -xz -C .jitpack-jdk --strip-components=1
 install:
-  - sdk use java $(cat .jitpack-jdk) && java -version && ./gradlew publishToMavenLocal --no-configuration-cache
+  - export JAVA_HOME=$PWD/.jitpack-jdk PATH=$PWD/.jitpack-jdk/bin:$PATH && java -version && ./gradlew publishToMavenLocal --no-configuration-cache
