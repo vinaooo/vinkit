@@ -97,14 +97,18 @@ fun SettingsScreen(
 }
 
 /**
- * "This will start a new game. The current game counts as a loss.": for a game setting that changes the mode of a
- * game in progress.
+ * For a game setting that changes the mode of a game in progress. [text] is "This will start a new game. The current
+ * game counts as a loss." unless the game says otherwise (a game that isn't recorded).
  */
 @Composable
-fun NewGameConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+fun NewGameConfirmDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    text: String = stringResource(R.string.vinkit_new_game_confirm_text),
+) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        text = { Text(stringResource(R.string.vinkit_new_game_confirm_text)) },
+        text = { Text(text) },
         confirmButton = {
             TextButton(onClick = onConfirm) { Text(stringResource(R.string.vinkit_new_game_confirm)) }
         },

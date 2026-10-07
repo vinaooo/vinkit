@@ -1,5 +1,8 @@
 package io.github.vinaooo.vinkit.settings
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -26,6 +29,7 @@ class SettingsScreenTest {
 
     private var current = AppSettings()
     private var gameValue = "A"
+    private var rival = 1
 
     private fun show(
         settings: AppSettings = AppSettings(),
@@ -44,6 +48,15 @@ class SettingsScreenTest {
                     gameSections = listOf(
                         SettingsSection("Game") {
                             Choice("Level", listOf("A" to "Easy", "B" to "Hard"), gameValue, { gameValue = it })
+                            IconChoice(
+                                "Rival",
+                                listOf(
+                                    IconOption(1, Icons.Rounded.Star, "Cat", "Plays at random"),
+                                    IconOption(2, Icons.Rounded.Favorite, "Owl", "Never loses"),
+                                ),
+                                rival,
+                                { rival = it },
+                            )
                         },
                     ),
                 )
@@ -57,6 +70,14 @@ class SettingsScreenTest {
         compose.onNodeWithText("Game").assertExists()
         compose.onNodeWithText("Hard").performClick()
         gameValue shouldBe "B"
+    }
+
+    @Test
+    fun `an icon choice names its options for TalkBack and explains the chosen one`() {
+        show()
+        compose.onNodeWithText("Plays at random").assertExists()
+        compose.onNodeWithContentDescription("Owl").performClick()
+        rival shouldBe 2
     }
 
     @Test
