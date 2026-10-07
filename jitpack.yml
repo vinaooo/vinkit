@@ -1,7 +1,6 @@
 # JitPack builds a tag with this and serves com.github.vinaooo.vinkit:<module>:<tag>.
+# Its image already has the Android SDK; AGP downloads a missing platform itself.
 jdk:
   - openjdk21
-before_install:
-  - ls -la gradle/wrapper; sha256sum gradle/wrapper/gradle-wrapper.jar; unzip -l gradle/wrapper/gradle-wrapper.jar | tail -1; java -version; echo "ANDROID_HOME=$ANDROID_HOME"; ls $ANDROID_HOME $ANDROID_HOME/platforms 2>&1 | head
 install:
   - ./gradlew publishToMavenLocal --no-configuration-cache
