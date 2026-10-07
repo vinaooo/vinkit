@@ -21,6 +21,9 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -91,23 +94,39 @@ private fun LazyListScope.tabs(
     groupName: @Composable (String) -> String,
     onSelectGroup: (String) -> Unit,
 ) {
-    if (uiState.groups.size > 1) {
-        item {
+    val groups = uiState.groups
+    when {
+        groups.size in 2..MAX_SEGMENTS -> item {
+            // The same segmented buttons as Settings' choices (board position, preferred hand).
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                groups.forEachIndexed { index, group ->
+                    SegmentedButton(
+                        selected = group == uiState.group,
+                        onClick = { onSelectGroup(group) },
+                        shape = SegmentedButtonDefaults.itemShape(index, groups.size),
+                    ) { Text(groupName(group)) }
+                }
+            }
+        }
+        groups.size > MAX_SEGMENTS -> item {
+            // More groups than fit a phone's width as segments: scrollable tabs.
             PrimaryScrollableTabRow(
-                selectedTabIndex = uiState.groups.indexOf(uiState.group).coerceAtLeast(0),
+                selectedTabIndex = groups.indexOf(uiState.group).coerceAtLeast(0),
                 edgePadding = 0.dp,
             ) {
-                uiState.groups.forEach { group ->
+                groups.forEach { group ->
                     Tab(selected = group == uiState.group, onClick = {
                         onSelectGroup(group)
                     }, text = { Text(groupName(group)) })
                 }
             }
         }
-    } else {
-        uiState.group?.let { item { Text(groupName(it), style = MaterialTheme.typography.titleMedium) } }
+        else -> uiState.group?.let { item { Text(groupName(it), style = MaterialTheme.typography.titleMedium) } }
     }
 }
+
+/** Up to this many groups show as segmented buttons; more, as scrollable tabs. */
+private const val MAX_SEGMENTS = 4
 
 /** Each mode of the tab: its name when the tab holds several, its stats, and its scores when [ranked]. */
 private fun LazyListScope.sections(

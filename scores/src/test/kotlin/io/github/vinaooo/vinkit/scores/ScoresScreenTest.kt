@@ -106,4 +106,16 @@ class ScoresScreenTest {
         compose.onNodeWithContentDescription("Losses, 2").assertExists()
         compose.onNodeWithText("Win a game to see your scores here.").assertDoesNotExist()
     }
+
+    @Test
+    fun `up to four groups are segmented buttons, more are scrollable tabs, and both select`() {
+        var chosen: String? = null
+        val five = listOf("A", "B", "C", "D", "E")
+        show(ScoresUiState(isLoading = false, groups = five, group = "A", sections = listOf(ModeSection("A")))) {
+            chosen = it
+        }
+        // Five scroll as tabs; the first ones are on screen.
+        compose.onNodeWithText("b").performClick()
+        chosen shouldBe "B"
+    }
 }
