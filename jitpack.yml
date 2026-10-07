@@ -1,0 +1,7 @@
+# JitPack builds a tag with this and serves com.github.vinaooo.vinkit:<module>:<tag>.
+jdk:
+  - openjdk21
+before_install:
+  - yes | sdkmanager "platforms;android-37.0" || true
+install:
+  - ./gradlew publishToMavenLocal --no-configuration-cache
