@@ -2,6 +2,6 @@
 jdk:
   - openjdk21
 before_install:
-  - yes | sdkmanager "platforms;android-37.0" || true
+  - ls -la gradle/wrapper; sha256sum gradle/wrapper/gradle-wrapper.jar; unzip -l gradle/wrapper/gradle-wrapper.jar | tail -1; java -version; echo "ANDROID_HOME=$ANDROID_HOME"; ls $ANDROID_HOME $ANDROID_HOME/platforms 2>&1 | head
 install:
   - ./gradlew publishToMavenLocal --no-configuration-cache
