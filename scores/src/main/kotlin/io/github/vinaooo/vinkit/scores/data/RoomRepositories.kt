@@ -52,6 +52,7 @@ private fun ScoreEntity.toRecord() = ScoreRecord(
     extras = runCatching { json.decodeFromString<Map<String, String>>(extras) }.getOrDefault(emptyMap()),
 )
 
-private fun GameStats.toEntity(mode: String) = StatsEntity(mode, played, won, currentStreak, bestStreak)
+private fun GameStats.toEntity(mode: String) = StatsEntity(mode, played, won, currentStreak, bestStreak, drawn)
 
-private fun StatsEntity?.toStats() = this?.let { GameStats(played, won, currentStreak, bestStreak) } ?: GameStats()
+private fun StatsEntity?.toStats() =
+    this?.let { GameStats(played, won, currentStreak, bestStreak, drawn) } ?: GameStats()

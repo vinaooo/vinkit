@@ -27,4 +27,11 @@ class ScoresTest {
         stats.winRatePercent shouldBe 75
         GameStats().winRatePercent shouldBe 0
     }
+
+    @Test
+    fun `a draw counts as played, not lost, and ends the streak`() {
+        val stats = GameStats().afterWin().afterDraw().afterLoss()
+        stats shouldBe GameStats(played = 3, won = 1, currentStreak = 0, bestStreak = 1, drawn = 1)
+        stats.lost shouldBe 1
+    }
 }

@@ -3,6 +3,8 @@
     <string name="vinkit_no_scores">Win a game to see your scores here.</string>
     <string name="vinkit_stat_played">Played</string>
     <string name="vinkit_stat_won">Won</string>
+    <string name="vinkit_stat_drawn">Draws</string>
+    <string name="vinkit_stat_lost">Losses</string>
     <string name="vinkit_stat_win_rate">Win rate</string>
     <string name="vinkit_stat_streak">Streak</string>
     <string name="vinkit_stat_best_streak">Best streak</string>

@@ -1,6 +1,8 @@
 package io.github.vinaooo.vinkit.scores.data
 
 import android.content.Context
+import androidx.room.AutoMigration
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
@@ -32,6 +34,7 @@ internal data class StatsEntity(
     val won: Int,
     val currentStreak: Int,
     val bestStreak: Int,
+    @ColumnInfo(defaultValue = "0") val drawn: Int,
 )
 
 @Dao
@@ -74,7 +77,13 @@ internal interface StatsDao {
  * manual one) and a test migrating from each exported schema in `scores/schemas`; never a destructive fallback,
  * which would wipe the players' scores.
  */
-@Database(entities = [ScoreEntity::class, StatsEntity::class], version = 1, exportSchema = true)
+@Database(
+    entities = [ScoreEntity::class, StatsEntity::class],
+    version = 2,
+    exportSchema = true,
+    // 2: stats.drawn.
+    autoMigrations = [AutoMigration(from = 1, to = 2)],
+)
 abstract class ScoresDatabase : RoomDatabase() {
     internal abstract fun scoreDao(): ScoreDao
 

@@ -19,7 +19,12 @@ class ScoresScreenTest {
     @get:Rule
     val compose = createComposeRule()
 
-    private fun show(state: ScoresUiState, onSelect: (String) -> Unit = {}) = compose.setContent {
+    private fun show(
+        state: ScoresUiState,
+        ranked: Boolean = true,
+        onSelect: (String) -> Unit = {
+        },
+    ) = compose.setContent {
         VinkitTheme(ThemeColor.BLUE) {
             ScoresScreen(
                 uiState = state,
@@ -27,6 +32,7 @@ class ScoresScreenTest {
                 modeName = { it.lowercase() },
                 onSelectMode = onSelect,
                 details = { "${it.extras["mistakes"]} mistakes" },
+                ranked = ranked,
             )
         }
     }
@@ -56,5 +62,16 @@ class ScoresScreenTest {
         show(ScoresUiState(isLoading = false, modes = listOf("EASY"), mode = "EASY", stats = GameStats(played = 1)))
         compose.onNodeWithText("easy").assertExists()
         compose.onNodeWithText("Win a game to see your scores here.").assertExists()
+    }
+
+    @Test
+    fun `a game without scores shows the stats alone, with draws and losses`() {
+        show(
+            ScoresUiState(isLoading = false, modes = listOf("EASY"), mode = "EASY", stats = GameStats(5, 2, 0, 1, 1)),
+            ranked = false,
+        )
+        compose.onNodeWithContentDescription("Draws, 1").assertExists()
+        compose.onNodeWithContentDescription("Losses, 2").assertExists()
+        compose.onNodeWithText("Win a game to see your scores here.").assertDoesNotExist()
     }
 }

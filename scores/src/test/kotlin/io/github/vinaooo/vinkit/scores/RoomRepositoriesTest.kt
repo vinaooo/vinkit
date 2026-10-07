@@ -62,9 +62,11 @@ class RoomRepositoriesTest {
         stats.update("CLASSIC") { it.afterWin() }
         stats.update("CLASSIC") { it.afterLoss() }
         stats.update("KILLER") { it.afterWin() }
+        stats.update("KILLER") { it.afterDraw() }
 
         stats.observe("CLASSIC").first() shouldBe GameStats(played = 3, won = 2, currentStreak = 0, bestStreak = 2)
-        stats.observe("KILLER").first() shouldBe GameStats(played = 1, won = 1, currentStreak = 1, bestStreak = 1)
+        stats.observe("KILLER").first() shouldBe
+            GameStats(played = 2, won = 1, currentStreak = 0, bestStreak = 1, drawn = 1)
     }
 
     @Test

@@ -32,8 +32,17 @@ enum class Ranking(val comparator: Comparator<ScoreRecord>) {
     FASTEST(compareBy<ScoreRecord> { it.elapsedSeconds }.thenByDescending { it.points }.thenBy { it.playedAtMillis }),
 }
 
-/** Statistics of one mode. */
-data class GameStats(val played: Int = 0, val won: Int = 0, val currentStreak: Int = 0, val bestStreak: Int = 0) {
+/** Statistics of one mode. [drawn] counts draws, for games that have them; a loss is a game neither won nor drawn. */
+data class GameStats(
+    val played: Int = 0,
+    val won: Int = 0,
+    val currentStreak: Int = 0,
+    val bestStreak: Int = 0,
+    val drawn: Int = 0,
+) {
+    val lost: Int
+        get() = played - won - drawn
+
     val winRatePercent: Int
         get() = if (played == 0) 0 else (won * PERCENT / played.toDouble()).roundToInt()
 
@@ -43,6 +52,9 @@ data class GameStats(val played: Int = 0, val won: Int = 0, val currentStreak: I
     }
 
     fun afterLoss(): GameStats = copy(played = played + 1, currentStreak = 0)
+
+    /** A draw ends the winning streak, as a loss does. */
+    fun afterDraw(): GameStats = copy(played = played + 1, drawn = drawn + 1, currentStreak = 0)
 
     private companion object {
         const val PERCENT = 100

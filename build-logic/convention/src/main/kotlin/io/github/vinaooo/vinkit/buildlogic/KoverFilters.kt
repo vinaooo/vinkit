@@ -13,6 +13,8 @@ internal fun KoverProjectExtension.excludeGeneratedAndUi() {
         classes(
             "*_Factory*", "*_HiltModules*", "*Hilt_*", "*_Impl*", "*_Provide*", "*_MembersInjector", "*.BuildConfig",
             "*ComposableSingletons*", "*.di.*", "*\$\$serializer",
+            // Android entry points: thin wiring, covered by app and on-device tests instead.
+            "*Activity", "*Application",
         )
         packages("dagger.hilt.internal", "hilt_aggregated_deps")
     }

@@ -42,7 +42,8 @@ import java.util.Date
 
 /**
  * A tab per mode played (a title instead for a single one), its stats and its top 10. [modeName] names a mode;
- * [details] is what the game shows under a score ("No mistakes · 2 hints"); the date follows it.
+ * [details] is what the game shows under a score ("No mistakes · 2 hints"); the date follows it. A game without
+ * scores (only wins, losses and draws) passes `ranked = false`: the stats alone, with draws.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +54,7 @@ fun ScoresScreen(
     modifier: Modifier = Modifier,
     onSelectMode: (String) -> Unit = {},
     details: @Composable (ScoreRecord) -> String? = { null },
+    ranked: Boolean = true,
 ) {
     Scaffold(
         modifier = modifier,
@@ -92,8 +94,8 @@ fun ScoresScreen(
             } else {
                 uiState.mode?.let { item { Text(modeName(it), style = MaterialTheme.typography.titleMedium) } }
             }
-            if (uiState.mode != null) item { StatsCard(uiState.stats) }
-            if (!uiState.isLoading && uiState.scores.isEmpty()) {
+            if (uiState.mode != null) item { StatsCard(uiState.stats, withDraws = !ranked) }
+            if (ranked && !uiState.isLoading && uiState.scores.isEmpty()) {
                 item {
                     Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                         Text(stringResource(R.string.vinkit_no_scores), style = MaterialTheme.typography.bodyLarge)
@@ -105,18 +107,39 @@ fun ScoresScreen(
     }
 }
 
+/** Played, won, win rate and streaks; [withDraws], draws and losses too, on two rows so a phone fits them. */
 @Composable
-private fun StatsCard(stats: GameStats) {
+private fun StatsCard(stats: GameStats, withDraws: Boolean) {
+    val played = StatItemData(stringResource(R.string.vinkit_stat_played), stats.played.toString())
+    val won = StatItemData(stringResource(R.string.vinkit_stat_won), stats.won.toString())
+    val rate = StatItemData(stringResource(R.string.vinkit_stat_win_rate), "${stats.winRatePercent}%")
+    val streak = StatItemData(stringResource(R.string.vinkit_stat_streak), stats.currentStreak.toString())
+    val best = StatItemData(stringResource(R.string.vinkit_stat_best_streak), stats.bestStreak.toString())
+    val rows = if (withDraws) {
+        listOf(
+            listOf(
+                played,
+                won,
+                StatItemData(stringResource(R.string.vinkit_stat_drawn), stats.drawn.toString()),
+                StatItemData(stringResource(R.string.vinkit_stat_lost), stats.lost.toString()),
+            ),
+            listOf(rate, streak, best),
+        )
+    } else {
+        listOf(listOf(played, won, rate, streak, best))
+    }
     Card(modifier = Modifier.fillMaxWidth()) {
-        Row(modifier = Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-            StatItem(stringResource(R.string.vinkit_stat_played), stats.played.toString())
-            StatItem(stringResource(R.string.vinkit_stat_won), stats.won.toString())
-            StatItem(stringResource(R.string.vinkit_stat_win_rate), "${stats.winRatePercent}%")
-            StatItem(stringResource(R.string.vinkit_stat_streak), stats.currentStreak.toString())
-            StatItem(stringResource(R.string.vinkit_stat_best_streak), stats.bestStreak.toString())
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            rows.forEach { row ->
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    row.forEach { StatItem(it.label, it.value) }
+                }
+            }
         }
     }
 }
+
+private class StatItemData(val label: String, val value: String)
 
 /** A value over its label, read by TalkBack as one item: "Won, 3". */
 @Composable
