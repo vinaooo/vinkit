@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vinkit_theme_color">Cor</string>
+    <string name="vinkit_color_green">Verde</string>
+    <string name="vinkit_color_teal">Verde-azulado</string>
+    <string name="vinkit_color_blue">Azul</string>
+    <string name="vinkit_color_indigo">Índigo</string>
+    <string name="vinkit_color_purple">Roxo</string>
+    <string name="vinkit_color_pink">Rosa</string>
+    <string name="vinkit_color_red">Vermelho</string>
+    <string name="vinkit_color_orange">Laranja</string>
+</resources>

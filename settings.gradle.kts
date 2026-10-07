@@ -25,3 +25,6 @@ rootProject.name = "vinkit"
 
 include(":catalog")
 include(":core")
+include(":designsystem")
+include(":ads")
+include(":bugreport")

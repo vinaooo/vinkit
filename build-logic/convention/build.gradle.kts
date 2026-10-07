@@ -61,6 +61,10 @@ gradlePlugin {
             id = "vinkit.root.coverage"
             implementationClass = "RootCoverageConventionPlugin"
         }
+        register("publish") {
+            id = "vinkit.publish"
+            implementationClass = "PublishConventionPlugin"
+        }
         register("quality") {
             id = "vinkit.quality"
             implementationClass = "QualityConventionPlugin"

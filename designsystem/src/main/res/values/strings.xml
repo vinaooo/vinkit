@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vinkit_theme_color">Color</string>
+    <string name="vinkit_color_green">Green</string>
+    <string name="vinkit_color_teal">Teal</string>
+    <string name="vinkit_color_blue">Blue</string>
+    <string name="vinkit_color_indigo">Indigo</string>
+    <string name="vinkit_color_purple">Purple</string>
+    <string name="vinkit_color_pink">Pink</string>
+    <string name="vinkit_color_red">Red</string>
+    <string name="vinkit_color_orange">Orange</string>
+</resources>

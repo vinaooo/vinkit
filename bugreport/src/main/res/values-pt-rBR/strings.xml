@@ -1,0 +1,10 @@
+<resources>
+    <string name="vinkit_report_bug">Relatar um bug</string>
+    <string name="vinkit_report_bug_body">Conte o que aconteceu. Enviar por e-mail anexa uma captura de tela e o jogo, para podermos reproduzi-lo.</string>
+    <string name="vinkit_report_bug_hint">O que deu errado?</string>
+    <string name="vinkit_report_by_email">E-mail</string>
+    <string name="vinkit_report_on_github">GitHub</string>
+    <string name="vinkit_report_cancel">Cancelar</string>
+    <!-- %1$s: o nome do app. -->
+    <string name="vinkit_report_subject">Relatório de bug do %1$s</string>
+</resources>

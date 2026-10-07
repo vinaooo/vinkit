@@ -133,3 +133,4 @@ vinkit-hilt = { id = "vinkit.hilt" }
 vinkit-jvm-library = { id = "vinkit.jvm.library" }
 vinkit-quality = { id = "vinkit.quality" }
 vinkit-root-coverage = { id = "vinkit.root.coverage" }
+vinkit-publish = { id = "vinkit.publish" }
