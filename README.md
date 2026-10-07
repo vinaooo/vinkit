@@ -25,15 +25,13 @@ takes only what it uses.
 
 ## Using it in a game
 
-`gradle.properties`: `vinkit.tag=0.1.0` (a release tag). `settings.gradle.kts`:
+Games always build against a published release from JitPack, never a local copy of vinkit. `gradle.properties` holds
+the newest tag (`vinkit.tag=0.1.0`); every vinkit release is followed by bumping it in each game. `settings.gradle.kts`:
 
 ```kotlin
 val vinkitTag = providers.gradleProperty("vinkit.tag").get()
-// -Pvinkit.local=true (or vinkit.local=true in ~/.gradle/gradle.properties) builds against ../vinkit's source.
-val vinkitLocal = providers.gradleProperty("vinkit.local").orNull == "true"
 
 pluginManagement {
-    if (providers.gradleProperty("vinkit.local").orNull == "true") includeBuild("../vinkit/build-logic")
     repositories {
         google()
         mavenCentral()
@@ -57,18 +55,14 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            if (vinkitLocal) from(files("../vinkit/gradle/libs.versions.toml"))
-            else from("com.github.vinaooo.vinkit:catalog:$vinkitTag")
+            from("com.github.vinaooo.vinkit:catalog:$vinkitTag")
         }
     }
 }
-
-if (vinkitLocal) includeBuild("../vinkit")
 ```
 
 Modules: `implementation("com.github.vinaooo.vinkit:core:${providers.gradleProperty("vinkit.tag").get()}")`, or add them to
-the game's own catalog. With `vinkit.local=true`, Gradle swaps in the local
-projects whatever the version, so kit and game are edited and built together without publishing.
+the game's own catalog.
 
 Release builds read their AdMob IDs and upload key from `local.properties` (`vinkit.ads.appId`,
 `vinkit.ads.bannerId`, `vinkit.ads.testDeviceIds`, `vinkit.signing.*`) or CI (`VINKIT_ADS_*`, `VINKIT_SIGNING_*`).
