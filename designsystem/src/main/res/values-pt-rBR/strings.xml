@@ -9,4 +9,17 @@
     <string name="vinkit_color_pink">Rosa</string>
     <string name="vinkit_color_red">Vermelho</string>
     <string name="vinkit_color_orange">Laranja</string>
+    <string name="vinkit_back">Voltar</string>
+    <plurals name="vinkit_elapsed_hours">
+        <item quantity="one">%1$d hora</item>
+        <item quantity="other">%1$d horas</item>
+    </plurals>
+    <plurals name="vinkit_elapsed_minutes">
+        <item quantity="one">%1$d minuto</item>
+        <item quantity="other">%1$d minutos</item>
+    </plurals>
+    <plurals name="vinkit_elapsed_seconds">
+        <item quantity="one">%1$d segundo</item>
+        <item quantity="other">%1$d segundos</item>
+    </plurals>
 </resources>

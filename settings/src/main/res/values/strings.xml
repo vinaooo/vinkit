@@ -1,0 +1,32 @@
+<resources>
+    <string name="vinkit_settings_title">Settings</string>
+    <string name="vinkit_section_appearance">Appearance</string>
+    <string name="vinkit_section_feedback">Feedback</string>
+    <string name="vinkit_new_game_confirm_text">This will start a new game. The current game counts as a loss.</string>
+    <string name="vinkit_new_game_confirm">Confirm</string>
+    <string name="vinkit_new_game_cancel">Cancel</string>
+    <string name="vinkit_phone_view">Phone view</string>
+    <string name="vinkit_phone_view_note">The board at a phone\'s size</string>
+    <string name="vinkit_phone_view_side">Board side</string>
+    <string name="vinkit_side_left">Left</string>
+    <string name="vinkit_side_center">Center</string>
+    <string name="vinkit_side_right">Right</string>
+    <string name="vinkit_theme">Theme</string>
+    <string name="vinkit_theme_system">System</string>
+    <string name="vinkit_theme_light">Light</string>
+    <string name="vinkit_theme_dark">Dark</string>
+    <string name="vinkit_dynamic_color">Dynamic color</string>
+    <string name="vinkit_dynamic_color_note">Use colors from your wallpaper</string>
+    <string name="vinkit_sound">Sound effects</string>
+    <string name="vinkit_haptics">Vibration</string>
+    <string name="vinkit_section_privacy">Privacy</string>
+    <string name="vinkit_privacy_policy">Privacy policy</string>
+    <string name="vinkit_privacy_options">Privacy options</string>
+    <string name="vinkit_privacy_options_note">Change your choices about ads and data</string>
+    <string name="vinkit_handedness">Preferred hand</string>
+    <string name="vinkit_hand_left">Left</string>
+    <string name="vinkit_hand_right">Right</string>
+    <string name="vinkit_board_alignment">Board position</string>
+    <string name="vinkit_board_top">Top</string>
+    <string name="vinkit_board_bottom">Bottom</string>
+</resources>

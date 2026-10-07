@@ -1,0 +1,79 @@
+package io.github.vinaooo.vinkit.settings
+
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import io.github.vinaooo.vinkit.core.AppSettings
+import io.github.vinaooo.vinkit.core.BoardAlignment
+import io.github.vinaooo.vinkit.core.Handedness
+import io.github.vinaooo.vinkit.core.PhoneViewSide
+import io.github.vinaooo.vinkit.core.ThemeColor
+import io.github.vinaooo.vinkit.core.ThemeMode
+import io.kotest.matchers.shouldBe
+import java.io.File
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+
+class DataStoreAppSettingsRepositoryTest {
+    @TempDir
+    lateinit var dir: File
+
+    private val scope = TestScope(StandardTestDispatcher())
+
+    private val store by lazy {
+        PreferenceDataStoreFactory.create(scope = scope.backgroundScope) { File(dir, "settings.preferences_pb") }
+    }
+
+    private val brand = AppSettings(themeColor = ThemeColor.GREEN)
+
+    private fun repository() = DataStoreAppSettingsRepository(store, brand)
+
+    @Test
+    fun `first launch reads the game's defaults`() = scope.runTest {
+        repository().settings.first() shouldBe brand
+    }
+
+    @Test
+    fun `every setting is persisted`() = scope.runTest {
+        val changed = AppSettings(
+            themeMode = ThemeMode.DARK,
+            dynamicColor = false,
+            themeColor = ThemeColor.PURPLE,
+            soundEnabled = false,
+            hapticsEnabled = false,
+            handedness = Handedness.LEFT,
+            boardAlignment = BoardAlignment.BOTTOM,
+            phoneView = true,
+            phoneViewSide = PhoneViewSide.LEFT,
+        )
+        repository().update { changed }
+
+        repository().settings.first() shouldBe changed
+    }
+
+    @Test
+    fun `updates transform the current value`() = scope.runTest {
+        val repository = repository()
+        repository.update { it.copy(themeMode = ThemeMode.LIGHT) }
+        repository.update { it.copy(soundEnabled = false) }
+
+        repository.settings.first() shouldBe brand.copy(themeMode = ThemeMode.LIGHT, soundEnabled = false)
+    }
+
+    @Test
+    fun `a value from a newer version reads as the default, and the game's own keys are left alone`() = scope.runTest {
+        val gameKey = stringPreferencesKey("variant")
+        store.edit {
+            it[stringPreferencesKey("theme_color")] = "GOLD"
+            it[gameKey] = "KILLER"
+        }
+        repository().update { it.copy(soundEnabled = false) }
+
+        repository().settings.first() shouldBe brand.copy(soundEnabled = false)
+        store.data.first()[gameKey] shouldBe "KILLER"
+    }
+}

@@ -1,0 +1,15 @@
+<resources>
+    <string name="vinkit_time">Tempo</string>
+    <string name="vinkit_new_game">Novo jogo</string>
+    <string name="vinkit_close_menu">Fechar menu</string>
+    <string name="vinkit_open_scores">Pontuações</string>
+    <string name="vinkit_open_settings">Configurações</string>
+    <string name="vinkit_you_won">Você venceu!</string>
+    <string name="vinkit_win_score">Pontuação: %1$d</string>
+    <string name="vinkit_win_time">Tempo: %1$s</string>
+    <string name="vinkit_undo">Desfazer</string>
+    <string name="vinkit_redo">Refazer</string>
+    <string name="vinkit_hint">Dica</string>
+    <string name="vinkit_undone">Jogada desfeita</string>
+    <string name="vinkit_redone">Jogada refeita</string>
+</resources>

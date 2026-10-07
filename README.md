@@ -15,13 +15,13 @@ takes only what it uses.
 |---|---|---|
 | `build-logic` (artifact `convention`) | convention plugins `vinkit.android.application`, `.android.library`, `.android.compose`, `.android.feature`, `.hilt`, `.jvm.library`, `.quality`, `.root.coverage`; detekt rules bundled | done |
 | `catalog` | the shared `libs.versions.toml` | done |
-| `core` | pure Kotlin: `GameCodec<T>` (bug-report state text), `formatElapsed`, `ThemeMode`, `ThemeColor` | done |
-| `designsystem` | `VinkitTheme` (Material 3 Expressive, dynamic color or one of 8 palettes), `ColorChoice` | done |
+| `core` | pure Kotlin: `GameCodec<T>`, `formatElapsed`, `AppSettings` + repository, `ScoreRecord`/`GameStats`/`Ranking` + repositories | done |
+| `designsystem` | `VinkitTheme` (Material 3 Expressive, dynamic color or one of 8 palettes), `ColorChoice`, `spokenElapsed` | done |
 | `ads` | `AdMobBanner` in its `BannerSlot`, UMP consent before the SDK starts (`DefaultAdConsent`) | done |
-| `settings` | common settings + DataStore + `SettingsScreen` with a game section slot | planned |
-| `scores` | Room scores DB, per-mode stats, `ScoresScreen` | planned |
+| `settings` | `DataStoreAppSettingsRepository`, `SettingsScreen(gameSections = …)`, rows (`Choice`, `ToggleRow`, `LinkRow`), `NewGameConfirmDialog` | done |
+| `scores` | `ScoresDatabase` (Room, `vinkit_scores.db`), `RoomScoreRepository`/`RoomStatsRepository`, open `ScoresViewModel`, `ScoresScreen` | done |
 | `bugreport` | `BugReportDialog`: email with screenshot and files, or a prefilled GitHub issue | done |
-| `shell` | game screen frame: floating toolbar, menus, win celebration, announcer, feedback, layouts | planned |
+| `shell` | `GameSurface` (screenshot + bug report + announcer), `GameFrame` (portrait/landscape/phone view, hand), `GameToolbar(actions, menuOptions)`, `WinDialog(lines)`, `ModeAndTime`, `Ticker`, `AndroidGameFeedback` | done |
 
 ## Using it in a game
 
@@ -92,6 +92,11 @@ object AdsModule {
     fun adBanner(config: AdsConfig, consent: AdConsent): AdBannerProvider = AdMobBanner(config, consent)
 }
 ```
+
+Settings: `DataStoreAppSettingsRepository(dataStore, AppSettings(themeColor = <brand>))`; the game may keep its own
+keys in the same DataStore. Scores: `ScoresDatabase.create(context)`, then `RoomScoreRepository(db)` and
+`RoomStatsRepository(db)`; subclass `ScoresViewModel` with `@HiltViewModel` to pass the game's modes and rankings.
+Feedback: one `AndroidGameFeedback(context)` per app (`@Singleton`).
 
 Theme: wrap the app in `VinkitTheme(themeColor = <brand or the player's choice>)`; a game's own colors (board,
 cards) go in a `CompositionLocal` built from `MaterialTheme.colorScheme` inside it.

@@ -1,0 +1,12 @@
+<resources>
+    <string name="vinkit_scores_title">Scores</string>
+    <string name="vinkit_no_scores">Win a game to see your scores here.</string>
+    <string name="vinkit_stat_played">Played</string>
+    <string name="vinkit_stat_won">Won</string>
+    <string name="vinkit_stat_win_rate">Win rate</string>
+    <string name="vinkit_stat_streak">Streak</string>
+    <string name="vinkit_stat_best_streak">Best streak</string>
+    <string name="vinkit_rank_description">Rank %1$d</string>
+    <!-- %1$s: the game's details; %2$s: the date. -->
+    <string name="vinkit_score_details">%1$s · %2$s</string>
+</resources>
