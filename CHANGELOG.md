@@ -2,6 +2,10 @@
 
 Breaking changes are marked **breaking**: a game must change its code when it bumps `vinkit.tag` past them.
 
+## 0.5.4
+- `scores`: the group selector uses segmented buttons only while every name fits its segment on one line; otherwise
+  scrollable tabs (Solo's "Vegas cumulative" wrapped mid-word on a phone).
+
 ## 0.5.3
 - `shell`: `GameFrame(sideWidth = null)` fits landscape's side columns to the info instead of 200dp, so the board gets
   the rest (Solo's sideways board).
