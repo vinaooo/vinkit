@@ -13,7 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-private const val TAG = "SudokuTrioAds"
+private const val TAG = "VinkitAds"
 
 /** [ConsentClient] on Google's User Messaging Platform. */
 class UmpConsentClient(context: Context) : ConsentClient {
