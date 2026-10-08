@@ -2,6 +2,9 @@
 
 Breaking changes are marked **breaking**: a game must change its code when it bumps `vinkit.tag` past them.
 
+## 0.5.9
+- `settings`: pt-BR names the feedback section "Sons e vibração" (what it holds) instead of "Retorno".
+
 ## 0.5.8
 - `scores`: a mode without a note takes no extra room (0.5.7 shifted every list down by 8dp).
 
