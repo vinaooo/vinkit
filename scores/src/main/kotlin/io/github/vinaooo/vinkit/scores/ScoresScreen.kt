@@ -104,6 +104,8 @@ private fun LazyListScope.tabs(
                         selected = group == uiState.group,
                         onClick = { onSelectGroup(group) },
                         shape = SegmentedButtonDefaults.itemShape(index, groups.size),
+                        // No check mark: the filled segment shows the choice (user's request).
+                        icon = {},
                     ) { Text(groupName(group)) }
                 }
             }
