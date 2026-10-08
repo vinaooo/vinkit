@@ -38,13 +38,15 @@ data class ScoresUiState(
  * The Scores screen's state. [modes] lists every mode the game knows, in order; a stored mode it doesn't list (from
  * a newer version) is skipped. [groupOf] puts modes in tabs (each mode its own tab by default; OX Play: one tab per
  * board, a section per opponent). [rankingFor] says how each mode ranks, or null for a mode with stats only (Solo's
-cumulative Vegas). Open, so a Hilt app can subclass it with an
+cumulative Vegas). [extraGroups] are the game's own tabs after the modes' (BattleGrid's achievements), always
+ * shown and without sections: `ScoresScreen(extra = …)` draws them. Open, so a Hilt app can subclass it with an
  * `@HiltViewModel @Inject constructor`.
  */
 open class ScoresViewModel(
     scores: ScoreRepository,
     stats: StatsRepository,
     modes: List<String>,
+    extraGroups: List<String> = emptyList(),
     // Before rankingFor, so a caller's trailing lambda stays the ranking.
     groupOf: (String) -> String = { it },
     rankingFor: (String) -> Ranking? = { Ranking.HIGHEST_POINTS },
@@ -55,11 +57,11 @@ open class ScoresViewModel(
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<ScoresUiState> =
         combine(stats.observePlayedModes(), chosen) { played, choice ->
-            val tabs = modes.filter { it in played }.map(groupOf).distinct()
+            val tabs = modes.filter { it in played }.map(groupOf).distinct() + extraGroups
             tabs to (choice?.takeIf { it in tabs } ?: tabs.firstOrNull())
         }.flatMapLatest { (tabs, group) ->
-            if (group == null) {
-                flowOf(ScoresUiState(isLoading = false))
+            if (group == null || group in extraGroups) {
+                flowOf(ScoresUiState(isLoading = false, groups = tabs, group = group))
             } else {
                 val sections = modes.filter { groupOf(it) == group }.map { mode ->
                     val ranking = rankingFor(mode)

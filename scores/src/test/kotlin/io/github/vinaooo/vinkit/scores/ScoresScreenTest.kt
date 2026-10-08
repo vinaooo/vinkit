@@ -1,5 +1,7 @@
 package io.github.vinaooo.vinkit.scores
 
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
@@ -55,6 +57,22 @@ class ScoresScreenTest {
                 },
             )
         }
+    }
+
+    @Test
+    fun `a game's own tab shows its content instead of mode sections`() {
+        compose.setContent {
+            VinkitTheme(ThemeColor.BLUE) {
+                ScoresScreen(
+                    uiState = ScoresUiState(isLoading = false, groups = listOf("EASY", "BADGES"), group = "BADGES"),
+                    onBack = {},
+                    modeName = { it.lowercase() },
+                    extra = mapOf<String, @Composable () -> Unit>("BADGES" to { Text("First win") }),
+                )
+            }
+        }
+        compose.onNodeWithText("First win").assertExists()
+        compose.onNodeWithText("badges").assertExists()
     }
 
     @Test

@@ -70,6 +70,30 @@ class ScoresViewModelTest {
     }
 
     @Test
+    fun `a game's own tabs follow the modes' tabs, always there and without sections`() = runTest(dispatcher) {
+        val viewModel = ScoresViewModel(scores, stats, listOf("EASY"), extraGroups = listOf("BADGES"))
+        viewModel.uiState.test {
+            skipItems(1)
+            awaitItem().groups shouldBe listOf("EASY", "BADGES")
+            viewModel.selectGroup("BADGES")
+            val state = awaitItem()
+            state.group shouldBe "BADGES"
+            state.sections shouldBe emptyList()
+        }
+    }
+
+    @Test
+    fun `a game's own tab shows before anything was played`() = runTest(dispatcher) {
+        val none = object : StatsRepository by stats {
+            override fun observePlayedModes() = flowOf(emptySet<String>())
+        }
+        ScoresViewModel(scores, none, listOf("EASY"), extraGroups = listOf("BADGES")).uiState.test {
+            skipItems(1)
+            awaitItem().group shouldBe "BADGES"
+        }
+    }
+
+    @Test
     fun `choosing a tab shows that mode`() = runTest(dispatcher) {
         val viewModel = viewModel()
         viewModel.uiState.test {

@@ -2,6 +2,16 @@
 
 Breaking changes are marked **breaking**: a game must change its code when it bumps `vinkit.tag` past them.
 
+## 0.6.0
+- `core`: `Ranking.LOWEST_POINTS`, the fewest points first, then the fastest (BattleGrid: shots to win); `scores`
+  stores and shows it like points.
+- `shell`: a game's own sounds: `AndroidGameFeedback(context, sounds = mapOf("hit" to R.raw.hit))`, played with
+  `feedback.give("hit", FeedbackEvent.MOVE, settings)` (the sound by name, the kit's haptic). `GameFeedback.sound(name)`
+  has a default, so existing fakes still compile.
+- `scores`: a game's own tabs after the modes' (BattleGrid's achievements): `ScoresViewModel(extraGroups = …)`,
+  drawn by `ScoresScreen(extra = mapOf("BADGES" to { … }))`. `extra` is the screen's new last parameter: a caller
+  passing `note` as a trailing lambda must name it.
+
 ## 0.5.9
 - `settings`: pt-BR names the feedback section "Sons e vibração" (what it holds) instead of "Retorno".
 

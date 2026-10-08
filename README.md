@@ -19,9 +19,9 @@ takes only what it uses.
 | `designsystem` | `VinkitTheme` (Material 3 Expressive, dynamic color or one of 8 palettes), `ColorChoice`, `spokenElapsed` | done |
 | `ads` | `AdMobBanner` in its `BannerSlot`, UMP consent before the SDK starts (`DefaultAdConsent`) | done |
 | `settings` | `DataStoreAppSettingsRepository`, `SettingsScreen(gameSections = …)`, rows (`Choice`, `IconChoice`, `ToggleRow`, `LinkRow`), `NewGameConfirmDialog(text)` | done |
-| `scores` | `ScoresDatabase` (Room, `vinkit_scores.db`), `RoomScoreRepository`/`RoomStatsRepository`, open `ScoresViewModel` (`groupOf`: modes grouped into tabs, a section per mode), `ScoresScreen` (`ranked = false`: stats with draws, no scores) | done |
+| `scores` | `ScoresDatabase` (Room, `vinkit_scores.db`), `RoomScoreRepository`/`RoomStatsRepository`, open `ScoresViewModel` (`groupOf`: modes grouped into tabs, a section per mode), `ScoresScreen` (`ranked = false`: stats with draws, no scores; `extra`: the game's own tabs) | done |
 | `bugreport` | `BugReportDialog`: email with screenshot and files, or a prefilled GitHub issue | done |
-| `shell` | `GameSurface` (screenshot + bug report + announcer), `GameFrame` (portrait/landscape/phone view, hand), `GameToolbar(actions, menuOptions)`, `WinDialog(lines)`, `ModeAndTime`, `Ticker`, `AndroidGameFeedback` | done |
+| `shell` | `GameSurface` (screenshot + bug report + announcer), `GameFrame` (portrait/landscape/phone view, hand), `GameToolbar(actions, menuOptions)`, `WinDialog(lines)`, `ModeAndTime`, `Ticker`, `AndroidGameFeedback` (the kit's sounds plus the game's own, by name) | done |
 
 ## Using it in a game
 

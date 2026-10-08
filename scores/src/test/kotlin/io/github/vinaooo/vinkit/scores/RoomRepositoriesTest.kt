@@ -48,6 +48,8 @@ class RoomRepositoriesTest {
             classic.sortedWith(Ranking.HIGHEST_POINTS.comparator).take(3)
         scores.observeTopScores("CLASSIC", Ranking.FASTEST).first() shouldBe
             classic.sortedWith(Ranking.FASTEST.comparator)
+        scores.observeTopScores("CLASSIC", Ranking.LOWEST_POINTS).first() shouldBe
+            classic.sortedWith(Ranking.LOWEST_POINTS.comparator)
         scores.observeTopScores("KILLER", Ranking.HIGHEST_POINTS).first() shouldBe listOf(record("KILLER", 9000))
     }
 

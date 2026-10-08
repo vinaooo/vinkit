@@ -15,6 +15,7 @@ class RoomScoreRepository(private val db: ScoresDatabase) : ScoreRepository {
         val rows = when (ranking) {
             Ranking.HIGHEST_POINTS -> db.scoreDao().observeHighestPoints(mode, limit)
             Ranking.FASTEST -> db.scoreDao().observeFastest(mode, limit)
+            Ranking.LOWEST_POINTS -> db.scoreDao().observeLowestPoints(mode, limit)
         }
         return rows.map { list -> list.map { it.toRecord() } }
     }

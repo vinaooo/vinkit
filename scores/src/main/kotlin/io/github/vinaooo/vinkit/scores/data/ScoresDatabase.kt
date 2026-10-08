@@ -49,6 +49,13 @@ internal interface ScoreDao {
     )
     fun observeHighestPoints(mode: String, limit: Int): Flow<List<ScoreEntity>>
 
+    /** `Ranking.LOWEST_POINTS` in SQL. */
+    @Query(
+        "SELECT * FROM scores WHERE mode = :mode " +
+            "ORDER BY points ASC, elapsedSeconds ASC, playedAtMillis ASC LIMIT :limit",
+    )
+    fun observeLowestPoints(mode: String, limit: Int): Flow<List<ScoreEntity>>
+
     /** `Ranking.FASTEST` in SQL. */
     @Query(
         "SELECT * FROM scores WHERE mode = :mode " +

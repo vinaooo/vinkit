@@ -64,7 +64,8 @@ import java.util.Date
  * shows under a score ("No mistakes · 2 hints"); the date follows it. [points] writes a score's points (Solo's Vegas:
  * dollars). [note] is a line under a mode's stats (Solo's cumulative Vegas: its balance). A mode ranked
  * [Ranking.FASTEST] shows its time in their place. A game without scores (only wins, losses
- * and draws) passes `ranked = false`: the stats alone, with draws. A single unranked mode is one whose ranking is null.
+ * and draws) passes `ranked = false`: the stats alone, with draws. [extra] draws the game's own tabs
+ * (`ScoresViewModel(extraGroups = …)`) in place of mode sections. A single unranked mode is one whose ranking is null.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,6 +80,7 @@ fun ScoresScreen(
     ranked: Boolean = true,
     points: @Composable (ScoreRecord) -> ScorePoints = { ScorePoints(it.points.toString()) },
     note: @Composable (String) -> String? = { null },
+    extra: Map<String, @Composable () -> Unit> = emptyMap(),
 ) {
     Scaffold(
         modifier = modifier,
@@ -99,6 +101,11 @@ fun ScoresScreen(
             // The selector stays put; the group's cards slide under it.
             GroupSelector(uiState, groupName, onSelectGroup, Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp))
             SlidingGroups(uiState, onSelectGroup, Modifier.fillMaxSize()) { shown ->
+                val own = extra[shown.group]
+                if (own != null) {
+                    Box(Modifier.fillMaxSize().padding(16.dp)) { own() }
+                    return@SlidingGroups
+                }
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),

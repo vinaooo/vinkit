@@ -8,8 +8,11 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 
-/** Make one per app (it loads the sounds once). */
-class AndroidGameFeedback(context: Context) : GameFeedback {
+/**
+ * Make one per app (it loads the sounds once). [sounds] are the game's own, a name to a raw resource
+ * (`"hit" to R.raw.hit`), played with `give(name, haptic, settings)`.
+ */
+class AndroidGameFeedback(context: Context, sounds: Map<String, Int> = emptyMap()) : GameFeedback {
 
     private val soundPool = SoundPool.Builder()
         .setMaxStreams(MAX_STREAMS)
@@ -27,6 +30,8 @@ class AndroidGameFeedback(context: Context) : GameFeedback {
         FeedbackEvent.WIN to soundPool.load(context, R.raw.vinkit_sfx_win, 1),
     )
 
+    private val gameSounds = sounds.mapValues { (_, res) -> soundPool.load(context, res, 1) }
+
     private val vibrator: Vibrator? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         context.getSystemService(VibratorManager::class.java)?.defaultVibrator
     } else {
@@ -36,6 +41,10 @@ class AndroidGameFeedback(context: Context) : GameFeedback {
 
     override fun sound(event: FeedbackEvent) {
         sounds[event]?.let { soundPool.play(it, VOLUME, VOLUME, 1, 0, 1f) }
+    }
+
+    override fun sound(name: String) {
+        gameSounds[name]?.let { soundPool.play(it, VOLUME, VOLUME, 1, 0, 1f) }
     }
 
     override fun haptic(event: FeedbackEvent) {

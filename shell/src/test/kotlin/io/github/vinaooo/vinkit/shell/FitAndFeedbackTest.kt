@@ -31,4 +31,24 @@ class FitAndFeedbackTest {
         feedback.give(FeedbackEvent.REJECTED, AppSettings(soundEnabled = false, hapticsEnabled = false))
         played shouldBe listOf("sound MOVE", "haptic MOVE", "haptic WIN")
     }
+
+    @Test
+    fun `a game's own sound plays with a kit haptic, each only when left on`() {
+        val played = mutableListOf<String>()
+        val feedback = object : GameFeedback {
+            override fun sound(event: FeedbackEvent) = Unit
+
+            override fun haptic(event: FeedbackEvent) {
+                played += "haptic $event"
+            }
+
+            override fun sound(name: String) {
+                played += "sound $name"
+            }
+        }
+        feedback.give("hit", FeedbackEvent.MOVE, AppSettings())
+        feedback.give("sunk", FeedbackEvent.WIN, AppSettings(hapticsEnabled = false))
+        feedback.give("miss", FeedbackEvent.MOVE, AppSettings(soundEnabled = false, hapticsEnabled = false))
+        played shouldBe listOf("sound hit", "haptic MOVE", "sound sunk")
+    }
 }

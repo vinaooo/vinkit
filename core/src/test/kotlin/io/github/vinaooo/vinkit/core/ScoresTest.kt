@@ -21,6 +21,13 @@ class ScoresTest {
     }
 
     @Test
+    fun `lowest points ranks by fewest points, then time, then the earliest`() {
+        val records = listOf(record(50, 90, 3), record(30, 200, 4), record(50, 60, 5), record(50, 60, 1))
+        records.sortedWith(Ranking.LOWEST_POINTS.comparator) shouldBe
+            listOf(record(30, 200, 4), record(50, 60, 1), record(50, 60, 5), record(50, 90, 3))
+    }
+
+    @Test
     fun `streaks grow with wins and reset on a loss`() {
         val stats = GameStats().afterWin().afterWin().afterLoss().afterWin()
         stats shouldBe GameStats(played = 4, won = 3, currentStreak = 1, bestStreak = 2)

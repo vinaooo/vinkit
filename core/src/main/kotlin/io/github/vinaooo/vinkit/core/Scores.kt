@@ -28,6 +28,9 @@ enum class Ranking(val comparator: Comparator<ScoreRecord>) {
         }.thenBy { it.elapsedSeconds }.thenBy { it.playedAtMillis },
     ),
 
+    /** The fewest points first (shots, strokes), then the fastest. */
+    LOWEST_POINTS(compareBy<ScoreRecord> { it.points }.thenBy { it.elapsedSeconds }.thenBy { it.playedAtMillis }),
+
     /** The fastest first, then the most points. */
     FASTEST(compareBy<ScoreRecord> { it.elapsedSeconds }.thenByDescending { it.points }.thenBy { it.playedAtMillis }),
 }
