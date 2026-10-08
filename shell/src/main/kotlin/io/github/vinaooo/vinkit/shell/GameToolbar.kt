@@ -38,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -151,18 +152,25 @@ private fun LtrIcon(icon: @Composable () -> Unit) {
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr, content = icon)
 }
 
-/** [content], with [tip]'s bubble (and the button's [icon]) pointing at it when there is one. */
+/**
+ * [content], with [tip]'s bubble (and the button's [icon]) pointing at it when there is one. The tooltip box stays
+ * around the button with or without a tip: dropping it when the tip goes (on the very press that closes the bubble)
+ * would rebuild the button under the finger and cancel that press.
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun TipBox(tip: ToolbarTip?, icon: ImageVector, vertical: Boolean, content: @Composable () -> Unit) {
-    if (tip == null) return content()
     val state = rememberTooltipState(isPersistent = true)
-    LaunchedEffect(tip.text) {
+    // The last text, so the bubble keeps it while it fades out after the tip is gone.
+    var text by remember { mutableStateOf("") }
+    val onShown by rememberUpdatedState(tip?.onShown)
+    LaunchedEffect(tip?.text) {
+        text = tip?.text ?: return@LaunchedEffect
         try {
             withTimeoutOrNull(TIP_MILLIS) { state.show() }
         } finally {
             state.dismiss()
-            tip.onShown()
+            onShown?.invoke()
         }
     }
     TooltipBox(
@@ -186,7 +194,7 @@ private fun TipBox(tip: ToolbarTip?, icon: ImageVector, vertical: Boolean, conte
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Text(tip.text, style = MaterialTheme.typography.labelLargeEmphasized)
+                    Text(text, style = MaterialTheme.typography.labelLargeEmphasized)
                 }
             }
         },
@@ -194,6 +202,8 @@ private fun TipBox(tip: ToolbarTip?, icon: ImageVector, vertical: Boolean, conte
         // Not focusable: the tap that lands on the button (or anywhere) closes the bubble and still does its job,
         // instead of being spent on closing it.
         focusable = false,
+        // Only a tip shows the bubble, never a long press.
+        enableUserInput = false,
         content = content,
     )
 }
