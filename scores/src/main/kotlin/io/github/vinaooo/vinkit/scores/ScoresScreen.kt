@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.github.vinaooo.vinkit.core.GameStats
+import io.github.vinaooo.vinkit.core.Ranking
 import io.github.vinaooo.vinkit.core.ScoreRecord
 import io.github.vinaooo.vinkit.core.formatElapsed
 import io.github.vinaooo.vinkit.designsystem.R as DesignR
@@ -57,8 +58,9 @@ import java.util.Date
 /**
  * A tab per group played (a title instead for a single one), and in it a section per mode: its name (when the tab
  * holds several), its stats and its top 10. [groupName] names a tab, [modeName] a mode; [details] is what the game
- * shows under a score ("No mistakes · 2 hints"); the date follows it. A game without scores (only wins, losses and
- * draws) passes `ranked = false`: the stats alone, with draws.
+ * shows under a score ("No mistakes · 2 hints"); the date follows it. [points] writes a score's points (Solo's Vegas:
+ * dollars). A mode ranked [Ranking.FASTEST] shows its time in their place. A game without scores (only wins, losses
+ * and draws) passes `ranked = false`: the stats alone, with draws. A single unranked mode is one whose ranking is null.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,6 +73,7 @@ fun ScoresScreen(
     onSelectGroup: (String) -> Unit = {},
     details: @Composable (ScoreRecord) -> String? = { null },
     ranked: Boolean = true,
+    points: @Composable (ScoreRecord) -> ScorePoints = { ScorePoints(it.points.toString()) },
 ) {
     Scaffold(
         modifier = modifier,
@@ -95,7 +98,7 @@ fun ScoresScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) { sections(shown, modeName, details, ranked) }
+                ) { sections(shown, ScoreText(modeName, details, points), ranked) }
             }
         }
     }
@@ -198,19 +201,24 @@ private fun GroupSelector(
 /** Up to this many groups show as segmented buttons; more, as scrollable tabs. */
 private const val MAX_SEGMENTS = 4
 
-/** Each mode of the tab: its name when the tab holds several, its stats, and its scores when [ranked]. */
-private fun LazyListScope.sections(
-    uiState: ScoresUiState,
-    modeName: @Composable (String) -> String,
-    details: @Composable (ScoreRecord) -> String?,
-    ranked: Boolean,
-) {
+/** How a score reads: [text] on screen and, when it differs (`-$12`), [spoken] by TalkBack ("minus 12 dollars"). */
+data class ScorePoints(val text: String, val spoken: String? = null)
+
+/** The game's words for a section and its scores. */
+private class ScoreText(
+    val modeName: @Composable (String) -> String,
+    val details: @Composable (ScoreRecord) -> String?,
+    val points: @Composable (ScoreRecord) -> ScorePoints,
+)
+
+/** Each mode of the tab: its name when the tab holds several, its stats, and its scores when it's ranked. */
+private fun LazyListScope.sections(uiState: ScoresUiState, text: ScoreText, ranked: Boolean) {
     val titled = uiState.sections.size > 1
     uiState.sections.forEach { section ->
         if (titled) {
             item(key = "title ${section.mode}") {
                 Text(
-                    modeName(section.mode),
+                    text.modeName(section.mode),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = 8.dp).semantics { heading() },
@@ -218,14 +226,28 @@ private fun LazyListScope.sections(
             }
         }
         item(key = "stats ${section.mode}") { StatsCard(section.stats, withDraws = !ranked) }
-        if (ranked && !uiState.isLoading && section.scores.isEmpty()) {
+        val ranking = section.ranking?.takeIf { ranked } ?: return@forEach
+        if (!uiState.isLoading && section.scores.isEmpty()) {
             item(key = "empty ${section.mode}") {
                 Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                     Text(stringResource(R.string.vinkit_no_scores), style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
-        if (ranked) itemsIndexed(section.scores) { index, record -> ScoreRow(index + 1, record, details(record)) }
+        itemsIndexed(section.scores) { index, record ->
+            ScoreRow(
+                index + 1,
+                record,
+                text.details(record),
+                if (ranking ==
+                    Ranking.FASTEST
+                ) {
+                    null
+                } else {
+                    text.points(record)
+                },
+            )
+        }
     }
 }
 
@@ -275,9 +297,9 @@ private fun StatItem(label: String, value: String) {
     }
 }
 
-/** The rank, the points, the time, and the game's details and the date below. */
+/** The rank, the [points] and the time (only the time when [points] is null), and the details and date below. */
 @Composable
-private fun ScoreRow(rank: Int, record: ScoreRecord, details: String?) {
+private fun ScoreRow(rank: Int, record: ScoreRecord, details: String?, points: ScorePoints?) {
     val date = DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(record.playedAtMillis))
     val rankDescription = stringResource(R.string.vinkit_rank_description, rank)
     val spokenTime = spokenElapsed(record.elapsedSeconds)
@@ -291,12 +313,21 @@ private fun ScoreRow(rank: Int, record: ScoreRecord, details: String?) {
             )
         },
         supportingContent = { Text(details?.let { stringResource(R.string.vinkit_score_details, it, date) } ?: date) },
-        trailingContent = {
-            Text(
-                formatElapsed(record.elapsedSeconds),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.semantics { contentDescription = spokenTime },
-            )
+        trailingContent = points?.let {
+            {
+                Text(
+                    formatElapsed(record.elapsedSeconds),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.semantics { contentDescription = spokenTime },
+                )
+            }
         },
-    ) { Text(record.points.toString(), fontWeight = FontWeight.Bold) }
+    ) {
+        val headline = points ?: ScorePoints(formatElapsed(record.elapsedSeconds), spokenTime)
+        Text(
+            headline.text,
+            fontWeight = FontWeight.Bold,
+            modifier = headline.spoken?.let { Modifier.semantics { contentDescription = it } } ?: Modifier,
+        )
+    }
 }

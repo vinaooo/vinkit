@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
 import io.github.vinaooo.vinkit.core.GameStats
+import io.github.vinaooo.vinkit.core.Ranking
 import io.github.vinaooo.vinkit.core.ScoreRecord
 import io.github.vinaooo.vinkit.core.ThemeColor
 import io.github.vinaooo.vinkit.designsystem.VinkitTheme
@@ -37,6 +38,15 @@ class ScoresScreenTest {
                 onSelectGroup = onSelect,
                 details = { "${it.extras["mistakes"]} mistakes" },
                 ranked = ranked,
+                points = {
+                    if (it.mode ==
+                        "VEGAS"
+                    ) {
+                        ScorePoints("$${it.points}", "${it.points} dollars")
+                    } else {
+                        ScorePoints("${it.points}")
+                    }
+                },
             )
         }
     }
@@ -137,5 +147,30 @@ class ScoresScreenTest {
         compose.onRoot().performTouchInput { swipeLeft() }
         compose.onRoot().performTouchInput { swipeRight() }
         picked shouldBe listOf("C", "A")
+    }
+
+    private fun one(section: ModeSection) =
+        show(ScoresUiState(isLoading = false, groups = listOf("ALL"), group = "ALL", sections = listOf(section)))
+
+    @Test
+    fun `the game writes the points`() {
+        one(ModeSection("VEGAS", GameStats(played = 1, won = 1), listOf(ScoreRecord("VEGAS", 13, 300, 0))))
+        compose.onNodeWithText("$13").assertExists()
+        compose.onNodeWithContentDescription("13 dollars").assertExists()
+    }
+
+    @Test
+    fun `a fastest ranking leads with the time and shows no points`() {
+        val record = ScoreRecord("TIMED", 777, 125, 0)
+        one(ModeSection("TIMED", GameStats(played = 1, won = 1), listOf(record), Ranking.FASTEST))
+        compose.onNodeWithText("2:05").assertExists()
+        compose.onNodeWithText("777").assertDoesNotExist()
+    }
+
+    @Test
+    fun `an unranked mode shows its stats and doesn't ask for a win`() {
+        one(ModeSection("BANK", GameStats(played = 2), ranking = null))
+        compose.onNodeWithContentDescription("Played, 2").assertExists()
+        compose.onNodeWithText("Win a game to see your scores here.").assertDoesNotExist()
     }
 }

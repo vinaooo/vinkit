@@ -16,11 +16,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
-/** One mode in the chosen tab: its stats and its top scores. */
+/** One mode in the chosen tab: its stats and its top scores, in its [ranking] (null: the mode isn't ranked). */
 data class ModeSection(
     val mode: String,
     val stats: GameStats = GameStats(),
     val scores: List<ScoreRecord> = emptyList(),
+    val ranking: Ranking? = Ranking.HIGHEST_POINTS,
 )
 
 data class ScoresUiState(
@@ -36,7 +37,8 @@ data class ScoresUiState(
 /**
  * The Scores screen's state. [modes] lists every mode the game knows, in order; a stored mode it doesn't list (from
  * a newer version) is skipped. [groupOf] puts modes in tabs (each mode its own tab by default; OX Play: one tab per
- * board, a section per opponent). [rankingFor] says how each mode ranks. Open, so a Hilt app can subclass it with an
+ * board, a section per opponent). [rankingFor] says how each mode ranks, or null for a mode with stats only (Solo's
+cumulative Vegas). Open, so a Hilt app can subclass it with an
  * `@HiltViewModel @Inject constructor`.
  */
 open class ScoresViewModel(
@@ -45,7 +47,7 @@ open class ScoresViewModel(
     modes: List<String>,
     // Before rankingFor, so a caller's trailing lambda stays the ranking.
     groupOf: (String) -> String = { it },
-    rankingFor: (String) -> Ranking = { Ranking.HIGHEST_POINTS },
+    rankingFor: (String) -> Ranking? = { Ranking.HIGHEST_POINTS },
 ) : ViewModel() {
     private val chosen = MutableStateFlow<String?>(null)
 
@@ -60,8 +62,10 @@ open class ScoresViewModel(
                 flowOf(ScoresUiState(isLoading = false))
             } else {
                 val sections = modes.filter { groupOf(it) == group }.map { mode ->
-                    combine(scores.observeTopScores(mode, rankingFor(mode)), stats.observe(mode)) { top, modeStats ->
-                        ModeSection(mode, modeStats, top)
+                    val ranking = rankingFor(mode)
+                    val top = ranking?.let { scores.observeTopScores(mode, it) } ?: flowOf(emptyList())
+                    combine(top, stats.observe(mode)) { records, modeStats ->
+                        ModeSection(mode, modeStats, records, ranking)
                     }
                 }
                 combine(sections) {

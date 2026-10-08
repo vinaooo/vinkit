@@ -98,4 +98,16 @@ class ScoresViewModelTest {
             hard.sections.last().stats shouldBe GameStats()
         }
     }
+
+    @Test
+    fun `a mode without a ranking has its stats and no scores`() = runTest(dispatcher) {
+        val unranked = ScoresViewModel(scores, stats, listOf("EASY")) { null }
+        unranked.uiState.test {
+            skipItems(1)
+            val section = awaitItem().sections.single()
+            section.ranking shouldBe null
+            section.scores shouldBe emptyList()
+            section.stats.won shouldBe 3
+        }
+    }
 }
