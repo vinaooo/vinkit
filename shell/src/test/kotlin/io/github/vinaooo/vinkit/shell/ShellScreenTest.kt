@@ -10,6 +10,9 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.testTag
@@ -20,6 +23,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import io.github.vinaooo.vinkit.core.AppSettings
 import io.github.vinaooo.vinkit.core.ThemeColor
 import io.github.vinaooo.vinkit.designsystem.VinkitTheme
@@ -161,5 +166,29 @@ class ShellScreenTest {
         landscape shouldBe false
         // A square board on a portrait phone would be as tall as it is wide; this one is taller.
         (boardHeight > compose.onRoot().fetchSemanticsNode().size.width) shouldBe true
+    }
+
+    @Test
+    @Config(qualifiers = "w891dp-h411dp-land")
+    fun `a side that fits its info leaves the board more room`() {
+        var side by mutableStateOf<Dp?>(200.dp)
+        var width = 0
+        compose.setContent {
+            VinkitTheme(ThemeColor.BLUE) {
+                GameFrame(
+                    settings = AppSettings(),
+                    info = { Text("65") },
+                    board = { Box(Modifier.fillMaxSize().onSizeChanged { width = it.width }) },
+                    toolbar = {},
+                    boardAspectRatio = null,
+                    sideWidth = side,
+                )
+            }
+        }
+        compose.waitForIdle()
+        val fixed = width
+        side = null
+        compose.waitForIdle()
+        (width > fixed) shouldBe true
     }
 }

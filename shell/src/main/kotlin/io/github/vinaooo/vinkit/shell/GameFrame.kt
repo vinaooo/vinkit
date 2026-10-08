@@ -36,7 +36,8 @@ import io.github.vinaooo.vinkit.core.PhoneViewSide
  * (a number pad; optional) and the [toolbar]. Landscape: [info] and the buttons on one side, the board centered at
  * full height, the controls and a vertical toolbar on the preferred hand's side. On a tablet, phone view keeps
  * board, controls and toolbar in one phone-wide column on the chosen side. A null [boardAspectRatio] gives the board
- * all of its room (Solo: its layout sizes the cards from it and places itself).
+ * all of its room, unpadded (Solo: its layout sizes the cards from it and places itself). [sideWidth] is landscape's
+ * side columns' width; null fits the info (Solo: its stats), leaving the board more room.
  */
 @Composable
 fun GameFrame(
@@ -49,10 +50,13 @@ fun GameFrame(
     onOpenScores: (() -> Unit)? = null,
     onOpenSettings: (() -> Unit)? = null,
     boardAspectRatio: Float? = 1f,
+    sideWidth: Dp? = SIDE_WIDTH,
 ) {
     val phoneView = settings.phoneView && LocalConfiguration.current.smallestScreenWidthDp >= TABLET_WIDTH_DP
     val slots =
-        Slots(info, board, toolbar, controls, { NavigationButtons(onOpenScores, onOpenSettings) }, boardAspectRatio)
+        Slots(info, board, toolbar, controls, {
+            NavigationButtons(onOpenScores, onOpenSettings)
+        }, boardAspectRatio, sideWidth)
     BoxWithConstraints(modifier.fillMaxSize().safeDrawingPadding()) {
         val frame = FrameInfo(
             // Phone view keeps its column in landscape too.
@@ -70,6 +74,7 @@ fun GameFrame(
     }
 }
 
+@Suppress("LongParameterList") // GameFrame's slots and sizes, passed down together.
 private class Slots(
     val info: @Composable (FrameInfo) -> Unit,
     val board: @Composable () -> Unit,
@@ -77,7 +82,12 @@ private class Slots(
     val controls: (@Composable (FrameInfo) -> Unit)?,
     val navigation: @Composable () -> Unit,
     val aspectRatio: Float?,
-)
+    val sideWidth: Dp?,
+) {
+    /** The board's margin: none for a board that takes all of its room. */
+    fun Modifier.boardPadding(horizontal: Dp, vertical: Dp) =
+        if (aspectRatio == null) this else padding(horizontal = horizontal, vertical = vertical)
+}
 
 @Composable
 private fun TopRegion(slots: Slots, frame: FrameInfo) {
@@ -98,7 +108,7 @@ private fun PortraitFrame(slots: Slots, frame: FrameInfo, alignment: BoardAlignm
         BoardBox(
             slots,
             BiasAlignment(0f, if (alignment == BoardAlignment.BOTTOM) 1f else -1f),
-            Modifier.fillMaxWidth().weight(1f).padding(horizontal = 8.dp, vertical = 4.dp),
+            with(slots) { Modifier.fillMaxWidth().weight(1f).boardPadding(8.dp, 4.dp) },
         )
         // On a tablet the controls would stretch across the screen: they keep a phone's proportions.
         Column(
@@ -130,7 +140,7 @@ private fun PhoneViewFrame(slots: Slots, frame: FrameInfo, settings: AppSettings
                         Modifier.fillMaxWidth().weight(1f)
                     } else {
                         Modifier.weight(1f, fill = false).aspectRatio(ratio, matchHeightConstraintsFirst = true)
-                    }.padding(horizontal = 8.dp, vertical = 4.dp),
+                    }.let { with(slots) { it.boardPadding(8.dp, 4.dp) } },
                 ) { slots.board() }
                 slots.controls?.invoke(frame)
                 Box(Modifier.padding(vertical = 12.dp)) { slots.toolbar(frame) }
@@ -143,7 +153,7 @@ private fun PhoneViewFrame(slots: Slots, frame: FrameInfo, settings: AppSettings
 private fun LandscapeFrame(slots: Slots, frame: FrameInfo) {
     val side: @Composable () -> Unit = {
         Column(
-            Modifier.width(SIDE_WIDTH).fillMaxHeight().padding(12.dp),
+            (slots.sideWidth?.let { Modifier.width(it) } ?: Modifier).fillMaxHeight().padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             slots.info(frame)
@@ -162,7 +172,7 @@ private fun LandscapeFrame(slots: Slots, frame: FrameInfo) {
     CenteredRow(
         modifier = Modifier.fillMaxSize(),
         start = if (frame.mirrored) controls else side,
-        center = { BoardBox(slots, Alignment.Center, Modifier.fillMaxSize().padding(8.dp)) },
+        center = { BoardBox(slots, Alignment.Center, with(slots) { Modifier.fillMaxSize().boardPadding(8.dp, 8.dp) }) },
         end = if (frame.mirrored) side else controls,
     )
 }
