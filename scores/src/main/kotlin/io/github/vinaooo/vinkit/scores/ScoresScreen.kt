@@ -246,10 +246,17 @@ private fun LazyListScope.sections(uiState: ScoresUiState, text: ScoreText, rank
                 )
             }
         }
-        item(key = "stats ${section.mode}") { StatsCard(section.stats, withDraws = !ranked) }
-        item(key = "note ${section.mode}") {
-            text.note(section.mode)?.let {
-                Text(it, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
+        item(key = "stats ${section.mode}") {
+            // The note in the stats' item: an empty item of its own would still add the list's spacing.
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                StatsCard(section.stats, withDraws = !ranked)
+                text.note(section.mode)?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    )
+                }
             }
         }
         val ranking = section.ranking?.takeIf { ranked } ?: return@forEach
