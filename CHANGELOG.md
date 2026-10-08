@@ -2,6 +2,10 @@
 
 Breaking changes are marked **breaking**: a game must change its code when it bumps `vinkit.tag` past them.
 
+## 0.5.6
+- `shell`: a finger's press on a button with a tip now works the first time: the button is no longer rebuilt when
+  its tip goes, which cancelled the press (0.5.5 only fixed quick taps). A long press shows no empty bubble.
+
 ## 0.5.5
 - `shell`: a `ToolbarTip` bubble is no longer focusable, so the tap on its button closes it and works at once (it
   took two taps: the first only closed the bubble).
