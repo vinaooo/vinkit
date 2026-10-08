@@ -142,18 +142,23 @@ class ShellScreenTest {
     @Test
     fun `a board without an aspect ratio gets all of its room`() {
         var boardHeight = 0
+        var landscape: Boolean? = null
         compose.setContent {
             VinkitTheme(ThemeColor.BLUE) {
                 GameFrame(
                     settings = AppSettings(),
                     info = {},
-                    board = { Box(Modifier.fillMaxSize().onSizeChanged { boardHeight = it.height }) },
+                    board = {
+                        landscape = LocalFrameInfo.current.landscape
+                        Box(Modifier.fillMaxSize().onSizeChanged { boardHeight = it.height })
+                    },
                     toolbar = {},
                     boardAspectRatio = null,
                 )
             }
         }
         compose.waitForIdle()
+        landscape shouldBe false
         // A square board on a portrait phone would be as tall as it is wide; this one is taller.
         (boardHeight > compose.onRoot().fetchSemanticsNode().size.width) shouldBe true
     }

@@ -13,6 +13,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
@@ -29,13 +30,15 @@ import kotlinx.coroutines.launch
 /**
  * The game screen's background. It records what it draws, so "Report a bug" can attach a screenshot of the game as it
  * was once the menu has closed; it tells the new game menu where the game lies ([LocalGameArea]); and it holds the
- * TalkBack [Announcer]. [content] gets the report action to pass to [GameToolbar]; null without a [reportTarget].
+ * TalkBack [Announcer]. [color] is its background (Solo: the table's). [content] gets the report action to pass to
+ * [GameToolbar]; null without a [reportTarget].
  */
 @Composable
 fun GameSurface(
     announcement: String?,
     announcementSequence: Int,
     modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.surface,
     reportTarget: ReportTarget? = null,
     gameReport: () -> GameReport = { GameReport() },
     content: @Composable (reportBug: (() -> Unit)?) -> Unit,
@@ -60,7 +63,7 @@ fun GameSurface(
                 frame.record { this@drawWithContent.drawContent() }
                 drawLayer(frame)
             },
-        color = MaterialTheme.colorScheme.surface,
+        color = color,
         contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
         // Surface stretches each direct child to its full size, so the tiny announcer sits in a Box of its own.

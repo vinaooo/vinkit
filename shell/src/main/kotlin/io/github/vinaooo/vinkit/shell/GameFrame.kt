@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
@@ -59,10 +60,12 @@ fun GameFrame(
             large = maxWidth >= LARGE_LANDSCAPE,
             mirrored = settings.handedness == Handedness.LEFT,
         )
-        when {
-            frame.landscape -> LandscapeFrame(slots, frame)
-            phoneView -> PhoneViewFrame(slots, frame, settings)
-            else -> PortraitFrame(slots, frame, settings.boardAlignment)
+        CompositionLocalProvider(LocalFrameInfo provides frame) {
+            when {
+                frame.landscape -> LandscapeFrame(slots, frame)
+                phoneView -> PhoneViewFrame(slots, frame, settings)
+                else -> PortraitFrame(slots, frame, settings.boardAlignment)
+            }
         }
     }
 }
