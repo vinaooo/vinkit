@@ -2,6 +2,10 @@
 
 Breaking changes are marked **breaking**: a game must change its code when it bumps `vinkit.tag` past them.
 
+## 0.5.2
+- `shell`: `GameSurface(color = …)` sets the game's background (Solo: its table).
+- `shell`: `LocalFrameInfo` gives the board the frame's layout (landscape, large, mirrored).
+
 ## 0.5.1
 - `scores`: before any game, the screen says "Win a game to see your scores here." (or, with `ranked = false`,
   "Play a game to see your stats here.") instead of staying blank.
