@@ -11,12 +11,14 @@ import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import io.github.vinaooo.vinkit.core.AppSettings
 import io.github.vinaooo.vinkit.core.ThemeColor
@@ -108,5 +110,51 @@ class ShellScreenTest {
         compose.onNodeWithText("Score: 900").assertExists()
         compose.onNodeWithText("New game").performClick()
         events shouldBe listOf("new")
+    }
+
+    @Test
+    fun `a hidden action leaves the toolbar, and a tip points out a shown one once`() {
+        var tipsShown = 0
+        compose.setContent {
+            VinkitTheme(ThemeColor.BLUE) {
+                GameToolbar(
+                    actions = listOf(
+                        ToolbarAction.Button(Icons.Rounded.Add, "Hidden", visible = false) {},
+                        ToolbarAction.Button(
+                            Icons.Rounded.Refresh,
+                            "Tipped",
+                            tip = ToolbarTip("Try me") {
+                                tipsShown++
+                            },
+                        ) {},
+                    ),
+                    menuOptions = listOf(MenuOption(Icons.Rounded.Add, "New game") {}),
+                )
+            }
+        }
+        compose.onNodeWithContentDescription("Hidden").assertDoesNotExist()
+        compose.onNodeWithText("Try me").assertExists()
+        compose.mainClock.advanceTimeBy(6_000)
+        compose.waitForIdle()
+        tipsShown shouldBe 1
+    }
+
+    @Test
+    fun `a board without an aspect ratio gets all of its room`() {
+        var boardHeight = 0
+        compose.setContent {
+            VinkitTheme(ThemeColor.BLUE) {
+                GameFrame(
+                    settings = AppSettings(),
+                    info = {},
+                    board = { Box(Modifier.fillMaxSize().onSizeChanged { boardHeight = it.height }) },
+                    toolbar = {},
+                    boardAspectRatio = null,
+                )
+            }
+        }
+        compose.waitForIdle()
+        // A square board on a portrait phone would be as tall as it is wide; this one is taller.
+        (boardHeight > compose.onRoot().fetchSemanticsNode().size.width) shouldBe true
     }
 }
