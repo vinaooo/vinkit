@@ -2,6 +2,11 @@
 
 Breaking changes are marked **breaking**: a game must change its code when it bumps `vinkit.tag` past them.
 
+## 0.5.3
+- `shell`: `GameFrame(sideWidth = null)` fits landscape's side columns to the info instead of 200dp, so the board gets
+  the rest (Solo's sideways board).
+- `shell`: a board without an aspect ratio gets no margin either: all of its room.
+
 ## 0.5.2
 - `shell`: `GameSurface(color = …)` sets the game's background (Solo: its table).
 - `shell`: `LocalFrameInfo` gives the board the frame's layout (landscape, large, mirrored).
