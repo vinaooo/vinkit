@@ -1,7 +1,7 @@
 <resources>
     <string name="vinkit_settings_title">Configurações</string>
     <string name="vinkit_section_appearance">Aparência</string>
-    <string name="vinkit_section_feedback">Retorno</string>
+    <string name="vinkit_section_feedback">Sons e vibração</string>
     <string name="vinkit_new_game_confirm_text">Isso vai começar um novo jogo. O jogo atual conta como derrota.</string>
     <string name="vinkit_new_game_confirm">Confirmar</string>
     <string name="vinkit_new_game_cancel">Cancelar</string>
