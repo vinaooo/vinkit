@@ -191,6 +191,9 @@ private fun TipBox(tip: ToolbarTip?, icon: ImageVector, vertical: Boolean, conte
             }
         },
         state = state,
+        // Not focusable: the tap that lands on the button (or anywhere) closes the bubble and still does its job,
+        // instead of being spent on closing it.
+        focusable = false,
         content = content,
     )
 }
