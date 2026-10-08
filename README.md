@@ -26,7 +26,7 @@ takes only what it uses.
 ## Using it in a game
 
 Games always build against a published release from JitPack, never a local copy of vinkit. `gradle.properties` holds
-the newest tag (`vinkit.tag=0.5.4`); every vinkit release is followed by bumping it in each game. `settings.gradle.kts`:
+the newest tag (`vinkit.tag=0.5.5`); every vinkit release is followed by bumping it in each game. `settings.gradle.kts`:
 
 ```kotlin
 val vinkitTag = providers.gradleProperty("vinkit.tag").get()

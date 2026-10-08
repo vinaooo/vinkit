@@ -2,6 +2,10 @@
 
 Breaking changes are marked **breaking**: a game must change its code when it bumps `vinkit.tag` past them.
 
+## 0.5.5
+- `shell`: a `ToolbarTip` bubble is no longer focusable, so the tap on its button closes it and works at once (it
+  took two taps: the first only closed the bubble).
+
 ## 0.5.4
 - `scores`: the group selector uses segmented buttons only while every name fits its segment on one line; otherwise
   scrollable tabs (Solo's "Vegas cumulative" wrapped mid-word on a phone).
