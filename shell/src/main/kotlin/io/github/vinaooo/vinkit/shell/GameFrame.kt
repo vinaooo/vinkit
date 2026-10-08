@@ -34,7 +34,8 @@ import io.github.vinaooo.vinkit.core.PhoneViewSide
  * top region, the [board] as the largest [boardAspectRatio] box at the top or bottom of its room, then [controls]
  * (a number pad; optional) and the [toolbar]. Landscape: [info] and the buttons on one side, the board centered at
  * full height, the controls and a vertical toolbar on the preferred hand's side. On a tablet, phone view keeps
- * board, controls and toolbar in one phone-wide column on the chosen side.
+ * board, controls and toolbar in one phone-wide column on the chosen side. A null [boardAspectRatio] gives the board
+ * all of its room (Solo: its layout sizes the cards from it and places itself).
  */
 @Composable
 fun GameFrame(
@@ -46,7 +47,7 @@ fun GameFrame(
     controls: (@Composable (FrameInfo) -> Unit)? = null,
     onOpenScores: (() -> Unit)? = null,
     onOpenSettings: (() -> Unit)? = null,
-    boardAspectRatio: Float = 1f,
+    boardAspectRatio: Float? = 1f,
 ) {
     val phoneView = settings.phoneView && LocalConfiguration.current.smallestScreenWidthDp >= TABLET_WIDTH_DP
     val slots =
@@ -72,7 +73,7 @@ private class Slots(
     val toolbar: @Composable (FrameInfo) -> Unit,
     val controls: (@Composable (FrameInfo) -> Unit)?,
     val navigation: @Composable () -> Unit,
-    val aspectRatio: Float,
+    val aspectRatio: Float?,
 )
 
 @Composable
@@ -120,10 +121,13 @@ private fun PhoneViewFrame(slots: Slots, frame: FrameInfo, settings: AppSettings
         Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = BiasAlignment(horizontal, vertical)) {
             Column(Modifier.width(PHONE_WIDTH), horizontalAlignment = Alignment.CenterHorizontally) {
                 // Measured after the controls and toolbar: a short screen shrinks the board.
+                val ratio = slots.aspectRatio
                 Box(
-                    Modifier.weight(1f, fill = false)
-                        .aspectRatio(slots.aspectRatio, matchHeightConstraintsFirst = true)
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    if (ratio == null) {
+                        Modifier.fillMaxWidth().weight(1f)
+                    } else {
+                        Modifier.weight(1f, fill = false).aspectRatio(ratio, matchHeightConstraintsFirst = true)
+                    }.padding(horizontal = 8.dp, vertical = 4.dp),
                 ) { slots.board() }
                 slots.controls?.invoke(frame)
                 Box(Modifier.padding(vertical = 12.dp)) { slots.toolbar(frame) }
@@ -160,11 +164,12 @@ private fun LandscapeFrame(slots: Slots, frame: FrameInfo) {
     )
 }
 
-/** The board as the largest box of its aspect ratio that fits, placed by [alignment] in its room. */
+/** The board as the largest box of its aspect ratio that fits, placed by [alignment] in its room; or all of it. */
 @Composable
 private fun BoardBox(slots: Slots, alignment: Alignment, modifier: Modifier) {
+    val ratio = slots.aspectRatio ?: return Box(modifier) { slots.board() }
     BoxWithConstraints(modifier, contentAlignment = alignment) {
-        val (width, height) = fit(maxWidth, maxHeight, slots.aspectRatio)
+        val (width, height) = fit(maxWidth, maxHeight, ratio)
         Box(Modifier.size(width, height)) { slots.board() }
     }
 }
