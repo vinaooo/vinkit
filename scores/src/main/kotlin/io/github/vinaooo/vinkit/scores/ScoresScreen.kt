@@ -62,7 +62,8 @@ import java.util.Date
  * A tab per group played (a title instead for a single one), and in it a section per mode: its name (when the tab
  * holds several), its stats and its top 10. [groupName] names a tab, [modeName] a mode; [details] is what the game
  * shows under a score ("No mistakes · 2 hints"); the date follows it. [points] writes a score's points (Solo's Vegas:
- * dollars). A mode ranked [Ranking.FASTEST] shows its time in their place. A game without scores (only wins, losses
+ * dollars). [note] is a line under a mode's stats (Solo's cumulative Vegas: its balance). A mode ranked
+ * [Ranking.FASTEST] shows its time in their place. A game without scores (only wins, losses
  * and draws) passes `ranked = false`: the stats alone, with draws. A single unranked mode is one whose ranking is null.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,6 +78,7 @@ fun ScoresScreen(
     details: @Composable (ScoreRecord) -> String? = { null },
     ranked: Boolean = true,
     points: @Composable (ScoreRecord) -> ScorePoints = { ScorePoints(it.points.toString()) },
+    note: @Composable (String) -> String? = { null },
 ) {
     Scaffold(
         modifier = modifier,
@@ -101,7 +103,7 @@ fun ScoresScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) { sections(shown, ScoreText(modeName, details, points), ranked) }
+                ) { sections(shown, ScoreText(modeName, details, points, note), ranked) }
             }
         }
     }
@@ -222,6 +224,7 @@ private class ScoreText(
     val modeName: @Composable (String) -> String,
     val details: @Composable (ScoreRecord) -> String?,
     val points: @Composable (ScoreRecord) -> ScorePoints,
+    val note: @Composable (String) -> String?,
 )
 
 /** Each mode of the tab: its name when the tab holds several, its stats, and its scores when it's ranked. */
@@ -244,6 +247,11 @@ private fun LazyListScope.sections(uiState: ScoresUiState, text: ScoreText, rank
             }
         }
         item(key = "stats ${section.mode}") { StatsCard(section.stats, withDraws = !ranked) }
+        item(key = "note ${section.mode}") {
+            text.note(section.mode)?.let {
+                Text(it, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
+            }
+        }
         val ranking = section.ranking?.takeIf { ranked } ?: return@forEach
         if (!uiState.isLoading && section.scores.isEmpty()) {
             item(key = "empty ${section.mode}") { Empty(R.string.vinkit_no_scores) }

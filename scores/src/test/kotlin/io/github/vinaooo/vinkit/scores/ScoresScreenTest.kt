@@ -226,4 +226,24 @@ class ScoresScreenTest {
         )
         compose.onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab)).assertCountEquals(0)
     }
+
+    @Test
+    fun `a mode's note shows under its stats`() {
+        compose.setContent {
+            VinkitTheme(ThemeColor.BLUE) {
+                ScoresScreen(
+                    uiState = ScoresUiState(
+                        isLoading = false,
+                        groups = listOf("BANK"),
+                        group = "BANK",
+                        sections = listOf(ModeSection("BANK", GameStats(played = 1))),
+                    ),
+                    onBack = {},
+                    modeName = { it },
+                    note = { if (it == "BANK") "Balance: -$104" else null },
+                )
+            }
+        }
+        compose.onNodeWithText("Balance: -$104").assertExists()
+    }
 }
