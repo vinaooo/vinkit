@@ -213,6 +213,11 @@ private class ScoreText(
 
 /** Each mode of the tab: its name when the tab holds several, its stats, and its scores when it's ranked. */
 private fun LazyListScope.sections(uiState: ScoresUiState, text: ScoreText, ranked: Boolean) {
+    // Nothing played yet: say what fills the screen.
+    if (!uiState.isLoading && uiState.sections.isEmpty()) {
+        item(key = "nothing") { Empty(if (ranked) R.string.vinkit_no_scores else R.string.vinkit_no_games) }
+        return
+    }
     val titled = uiState.sections.size > 1
     uiState.sections.forEach { section ->
         if (titled) {
@@ -228,11 +233,7 @@ private fun LazyListScope.sections(uiState: ScoresUiState, text: ScoreText, rank
         item(key = "stats ${section.mode}") { StatsCard(section.stats, withDraws = !ranked) }
         val ranking = section.ranking?.takeIf { ranked } ?: return@forEach
         if (!uiState.isLoading && section.scores.isEmpty()) {
-            item(key = "empty ${section.mode}") {
-                Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                    Text(stringResource(R.string.vinkit_no_scores), style = MaterialTheme.typography.bodyLarge)
-                }
-            }
+            item(key = "empty ${section.mode}") { Empty(R.string.vinkit_no_scores) }
         }
         itemsIndexed(section.scores) { index, record ->
             ScoreRow(
@@ -248,6 +249,13 @@ private fun LazyListScope.sections(uiState: ScoresUiState, text: ScoreText, rank
                 },
             )
         }
+    }
+}
+
+@Composable
+private fun Empty(text: Int) {
+    Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+        Text(stringResource(text), style = MaterialTheme.typography.bodyLarge)
     }
 }
 

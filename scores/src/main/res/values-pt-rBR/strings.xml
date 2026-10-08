@@ -11,4 +11,5 @@
     <string name="vinkit_rank_description">%1$dº lugar</string>
     <!-- %1$s: the game's details; %2$s: the date. -->
     <string name="vinkit_score_details">%1$s · %2$s</string>
+    <string name="vinkit_no_games">Jogue uma partida para ver suas estatísticas aqui.</string>
 </resources>

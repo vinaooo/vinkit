@@ -173,4 +173,16 @@ class ScoresScreenTest {
         compose.onNodeWithContentDescription("Played, 2").assertExists()
         compose.onNodeWithText("Win a game to see your scores here.").assertDoesNotExist()
     }
+
+    @Test
+    fun `before any game, the screen says what fills it`() {
+        show(ScoresUiState(isLoading = false))
+        compose.onNodeWithText("Win a game to see your scores here.").assertExists()
+    }
+
+    @Test
+    fun `a game without scores asks for a game instead`() {
+        show(ScoresUiState(isLoading = false), ranked = false)
+        compose.onNodeWithText("Play a game to see your stats here.").assertExists()
+    }
 }
