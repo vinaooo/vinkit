@@ -9,6 +9,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -38,12 +39,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.github.vinaooo.vinkit.core.GameStats
@@ -163,43 +166,53 @@ private fun GroupSelector(
     modifier: Modifier = Modifier,
 ) {
     val groups = uiState.groups
-    when {
-        groups.size in 2..MAX_SEGMENTS -> {
-            // The same segmented buttons as Settings' choices (board position, preferred hand).
-            SingleChoiceSegmentedButtonRow(modifier.fillMaxWidth()) {
-                groups.forEachIndexed { index, group ->
-                    SegmentedButton(
-                        selected = group == uiState.group,
-                        onClick = { onSelectGroup(group) },
-                        shape = SegmentedButtonDefaults.itemShape(index, groups.size),
-                        // No check mark: the filled segment shows the choice (user's request).
-                        icon = {},
-                    ) { Text(groupName(group)) }
+    BoxWithConstraints(modifier) {
+        val names = groups.map { groupName(it) }
+        val measurer = rememberTextMeasurer()
+        val style = MaterialTheme.typography.labelLarge
+        val density = LocalDensity.current
+        // Segments only while every name fits its share of the row on one line; otherwise they'd wrap mid-word.
+        val room = maxWidth / groups.size.coerceAtLeast(1) - SEGMENT_PADDING
+        val fits = groups.size <= MAX_SEGMENTS &&
+            names.all { with(density) { measurer.measure(it, style, maxLines = 1).size.width.toDp() } <= room }
+        when {
+            groups.size >= 2 && fits -> {
+                // The same segmented buttons as Settings' choices (board position, preferred hand).
+                SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                    groups.forEachIndexed { index, group ->
+                        SegmentedButton(
+                            selected = group == uiState.group,
+                            onClick = { onSelectGroup(group) },
+                            shape = SegmentedButtonDefaults.itemShape(index, groups.size),
+                            // No check mark: the filled segment shows the choice (user's request).
+                            icon = {},
+                        ) { Text(names[index], maxLines = 1) }
+                    }
                 }
             }
-        }
-        groups.size > MAX_SEGMENTS -> {
-            // More groups than fit a phone's width as segments: scrollable tabs.
-            PrimaryScrollableTabRow(
-                selectedTabIndex = groups.indexOf(uiState.group).coerceAtLeast(0),
-                modifier = modifier,
-                edgePadding = 0.dp,
-            ) {
-                groups.forEach { group ->
-                    Tab(selected = group == uiState.group, onClick = {
-                        onSelectGroup(group)
-                    }, text = { Text(groupName(group)) })
+            groups.size >= 2 -> {
+                // Too many groups, or names too long, for segments: scrollable tabs.
+                PrimaryScrollableTabRow(
+                    selectedTabIndex = groups.indexOf(uiState.group).coerceAtLeast(0),
+                    edgePadding = 0.dp,
+                ) {
+                    groups.forEachIndexed { index, group ->
+                        Tab(selected = group == uiState.group, onClick = {
+                            onSelectGroup(group)
+                        }, text = { Text(names[index], maxLines = 1) })
+                    }
                 }
             }
-        }
-        else -> uiState.group?.let {
-            Text(groupName(it), style = MaterialTheme.typography.titleMedium, modifier = modifier)
+            else -> uiState.group?.let { Text(groupName(it), style = MaterialTheme.typography.titleMedium) }
         }
     }
 }
 
-/** Up to this many groups show as segmented buttons; more, as scrollable tabs. */
+/** Up to this many groups show as segmented buttons, if their names fit; more, as scrollable tabs. */
 private const val MAX_SEGMENTS = 4
+
+/** A segment's room taken by its padding and border, around the name. */
+private val SEGMENT_PADDING = 32.dp
 
 /** How a score reads: [text] on screen and, when it differs (`-$12`), [spoken] by TalkBack ("minus 12 dollars"). */
 data class ScorePoints(val text: String, val spoken: String? = null)

@@ -1,5 +1,9 @@
 package io.github.vinaooo.vinkit.scores
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -18,6 +22,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 
 @RunWith(RobolectricTestRunner::class)
 class ScoresScreenTest {
@@ -184,5 +190,40 @@ class ScoresScreenTest {
     fun `a game without scores asks for a game instead`() {
         show(ScoresUiState(isLoading = false), ranked = false)
         compose.onNodeWithText("Play a game to see your stats here.").assertExists()
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h640dp")
+    @GraphicsMode(GraphicsMode.Mode.NATIVE) // Real text widths.
+    fun `names too long for segments make scrollable tabs instead`() {
+        var chosen: String? = null
+        val groups = listOf("Standard", "Vegas", "Vegas cumulative", "Counter time")
+        show(
+            ScoresUiState(
+                isLoading = false,
+                groups = groups,
+                group = "Standard",
+                sections = listOf(ModeSection("Standard")),
+            ),
+        ) {
+            chosen = it
+        }
+        compose.onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab)).assertCountEquals(4)
+        compose.onNodeWithText("vegas cumulative").performClick()
+        chosen shouldBe "Vegas cumulative"
+    }
+
+    @Test
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun `short names stay segmented buttons`() {
+        show(
+            ScoresUiState(
+                isLoading = false,
+                groups = listOf("A", "B"),
+                group = "A",
+                sections = listOf(ModeSection("A")),
+            ),
+        )
+        compose.onAllNodes(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab)).assertCountEquals(0)
     }
 }
