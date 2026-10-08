@@ -3,7 +3,11 @@ package io.github.vinaooo.vinkit.scores
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.test.swipeRight
 import io.github.vinaooo.vinkit.core.GameStats
 import io.github.vinaooo.vinkit.core.ScoreRecord
 import io.github.vinaooo.vinkit.core.ThemeColor
@@ -117,5 +121,21 @@ class ScoresScreenTest {
         // Five scroll as tabs; the first ones are on screen.
         compose.onNodeWithText("b").performClick()
         chosen shouldBe "B"
+    }
+
+    @Test
+    fun `a swipe to the left picks the next group, to the right the previous one`() {
+        val picked = mutableListOf<String>()
+        val state = ScoresUiState(
+            isLoading = false,
+            groups = listOf("A", "B", "C"),
+            group = "B",
+            sections = listOf(ModeSection("B", GameStats(played = 1))),
+        )
+        show(state) { picked += it }
+        // Across the whole screen: its middle is the cards, below the selector.
+        compose.onRoot().performTouchInput { swipeLeft() }
+        compose.onRoot().performTouchInput { swipeRight() }
+        picked shouldBe listOf("C", "A")
     }
 }

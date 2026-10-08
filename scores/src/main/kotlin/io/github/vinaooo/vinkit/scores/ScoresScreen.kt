@@ -1,5 +1,12 @@
 package io.github.vinaooo.vinkit.scores
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,12 +37,14 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.github.vinaooo.vinkit.core.GameStats
 import io.github.vinaooo.vinkit.core.ScoreRecord
@@ -78,27 +87,83 @@ fun ScoresScreen(
             )
         },
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            tabs(uiState, groupName, onSelectGroup)
-            sections(uiState, modeName, details, ranked)
+        Column(Modifier.fillMaxSize().padding(padding)) {
+            // The selector stays put; the group's cards slide under it.
+            GroupSelector(uiState, groupName, onSelectGroup, Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp))
+            SlidingGroups(uiState, onSelectGroup, Modifier.fillMaxSize()) { shown ->
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) { sections(shown, modeName, details, ranked) }
+            }
         }
     }
 }
 
-private fun LazyListScope.tabs(
+/**
+ * [content] for the chosen group, sliding in from the side of the group it comes from (right for a later one), with
+ * the motion scheme's spring. A horizontal swipe picks the next or the previous group. Each page keeps its own state
+ * while it slides out, so the old cards don't show the new group's numbers.
+ */
+@Composable
+private fun SlidingGroups(
+    uiState: ScoresUiState,
+    onSelectGroup: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable (ScoresUiState) -> Unit,
+) {
+    val spatial = MaterialTheme.motionScheme.defaultSpatialSpec<IntOffset>()
+    val fade = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+    val groups = uiState.groups
+    AnimatedContent(
+        targetState = uiState,
+        contentKey = { it.group },
+        transitionSpec = {
+            val forward = groups.indexOf(targetState.group) > groups.indexOf(initialState.group)
+            val direction = if (forward) 1 else -1
+            (slideInHorizontally(spatial) { it * direction } + fadeIn(fade)) togetherWith
+                (slideOutHorizontally(spatial) { -it * direction } + fadeOut(fade))
+        },
+        label = "scores group",
+        modifier = modifier.swipeBetween(groups, uiState.group, onSelectGroup),
+    ) { shown -> content(shown) }
+}
+
+/** A horizontal swipe past [SWIPE_DP] picks the next group (to the left) or the previous one (to the right). */
+private fun Modifier.swipeBetween(groups: List<String>, group: String?, onSelectGroup: (String) -> Unit): Modifier =
+    pointerInput(groups, group) {
+        val threshold = SWIPE_DP.dp.toPx()
+        var dragged = 0f
+        detectHorizontalDragGestures(
+            onDragStart = { dragged = 0f },
+            onHorizontalDrag = { _, amount -> dragged += amount },
+            onDragEnd = {
+                val index = groups.indexOf(group)
+                val next = when {
+                    dragged < -threshold -> index + 1
+                    dragged > threshold -> index - 1
+                    else -> index
+                }
+                groups.getOrNull(next)?.takeIf { it != group }?.let(onSelectGroup)
+            },
+        )
+    }
+
+private const val SWIPE_DP = 56
+
+@Composable
+private fun GroupSelector(
     uiState: ScoresUiState,
     groupName: @Composable (String) -> String,
     onSelectGroup: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val groups = uiState.groups
     when {
-        groups.size in 2..MAX_SEGMENTS -> item {
+        groups.size in 2..MAX_SEGMENTS -> {
             // The same segmented buttons as Settings' choices (board position, preferred hand).
-            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+            SingleChoiceSegmentedButtonRow(modifier.fillMaxWidth()) {
                 groups.forEachIndexed { index, group ->
                     SegmentedButton(
                         selected = group == uiState.group,
@@ -110,10 +175,11 @@ private fun LazyListScope.tabs(
                 }
             }
         }
-        groups.size > MAX_SEGMENTS -> item {
+        groups.size > MAX_SEGMENTS -> {
             // More groups than fit a phone's width as segments: scrollable tabs.
             PrimaryScrollableTabRow(
                 selectedTabIndex = groups.indexOf(uiState.group).coerceAtLeast(0),
+                modifier = modifier,
                 edgePadding = 0.dp,
             ) {
                 groups.forEach { group ->
@@ -123,7 +189,9 @@ private fun LazyListScope.tabs(
                 }
             }
         }
-        else -> uiState.group?.let { item { Text(groupName(it), style = MaterialTheme.typography.titleMedium) } }
+        else -> uiState.group?.let {
+            Text(groupName(it), style = MaterialTheme.typography.titleMedium, modifier = modifier)
+        }
     }
 }
 
