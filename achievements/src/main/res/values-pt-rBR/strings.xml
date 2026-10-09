@@ -1,0 +1,5 @@
+<resources>
+    <string name="vinkit_badges">Medalhas</string>
+    <string name="vinkit_badge_locked">%1$s, bloqueada: %2$s</string>
+    <string name="vinkit_badge_unlocked">%1$s, conquistada: %2$s</string>
+</resources>

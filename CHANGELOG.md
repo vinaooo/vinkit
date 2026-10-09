@@ -2,6 +2,13 @@
 
 Breaking changes are marked **breaking**: a game must change its code when it bumps `vinkit.tag` past them.
 
+## 0.8.0
+- `core`: `AchievementProgress` (badges earned and collected sets, by the game's own string keys) and
+  `AchievementRepository`; `unlock { rules }` returns the badges just earned. The rules stay in the game.
+- New `achievements` module: `DataStoreAchievementRepository` (`achievements_unlocked` and `achievements_<name>` in the
+  shared DataStore, the keys BattleGrid already wrote), open `BadgesViewModel`, `BadgesScreen` and `BadgesList`
+  (earned in primary, locked dimmed; one TalkBack item each).
+
 ## 0.7.0
 - `shell`: `GameFrame(navigation = listOf(NavigationAction(icon, label) { … }))` adds a game's own screen buttons
   before Scores and Settings (BattleGrid's badges). `NavigationButtons` takes them too. New last parameter, with a

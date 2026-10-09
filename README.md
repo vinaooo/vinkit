@@ -15,11 +15,12 @@ takes only what it uses.
 |---|---|---|
 | `build-logic` (artifact `convention`) | convention plugins `vinkit.android.application`, `.android.library`, `.android.compose`, `.android.feature`, `.hilt`, `.jvm.library`, `.quality`, `.root.coverage`; detekt rules bundled | done |
 | `catalog` | the shared `libs.versions.toml` | done |
-| `core` | pure Kotlin: `GameCodec<T>`, `formatElapsed`, `AppSettings` + repository, `ScoreRecord`/`GameStats`/`Ranking` + repositories | done |
+| `core` | pure Kotlin: `GameCodec<T>`, `formatElapsed`, `AppSettings` + repository, `ScoreRecord`/`GameStats`/`Ranking` + repositories, `AchievementProgress` + `AchievementRepository` (`unlock`) | done |
 | `designsystem` | `VinkitTheme` (Material 3 Expressive, dynamic color or one of 8 palettes), `ColorChoice`, `spokenElapsed` | done |
 | `ads` | `AdMobBanner` in its `BannerSlot`, UMP consent before the SDK starts (`DefaultAdConsent`) | done |
 | `settings` | `DataStoreAppSettingsRepository`, `SettingsScreen(gameSections = …)`, rows (`Choice`, `IconChoice`, `ToggleRow`, `LinkRow`), `NewGameConfirmDialog(text)` | done |
 | `scores` | `ScoresDatabase` (Room, `vinkit_scores.db`), `RoomScoreRepository`/`RoomStatsRepository`, open `ScoresViewModel` (`groupOf`: modes grouped into tabs, a section per mode), `ScoresScreen` (`ranked = false`: stats with draws, no scores; `extra`: the game's own tabs) | done |
+| `achievements` | `DataStoreAchievementRepository` (the game's badges and collected sets, `achievements_*` keys in the shared DataStore), open `BadgesViewModel`, `BadgesScreen(badges, unlocked, onBack)` / `BadgesList` | done |
 | `bugreport` | `BugReportDialog`: email with screenshot and files, or a prefilled GitHub issue | done |
 | `shell` | `GameSurface` (screenshot + bug report + announcer), `GameFrame` (portrait/landscape/phone view, hand), `GameToolbar(actions, menuOptions)`, `WinDialog(lines)`, `ModeAndTime`, `Ticker`, `AndroidGameFeedback` (the kit's sounds plus the game's own, by name) | done |
 
