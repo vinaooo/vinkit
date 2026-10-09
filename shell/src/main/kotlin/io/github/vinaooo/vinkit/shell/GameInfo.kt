@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -40,9 +41,17 @@ fun ModeAndTime(name: String, elapsedSeconds: Long, modifier: Modifier = Modifie
     }
 }
 
-/** The Scores and Settings buttons, each shown only when its screen exists. */
+/** A game's own screen button beside Scores and Settings (BattleGrid's badges). */
+data class NavigationAction(val icon: ImageVector, val label: String, val onClick: () -> Unit)
+
+/** The game's own [navigation] buttons, then Scores and Settings, each shown only when its screen exists. */
 @Composable
-fun NavigationButtons(onOpenScores: (() -> Unit)?, onOpenSettings: (() -> Unit)?) {
+fun NavigationButtons(
+    onOpenScores: (() -> Unit)?,
+    onOpenSettings: (() -> Unit)?,
+    navigation: List<NavigationAction> = emptyList(),
+) {
+    navigation.forEach { IconButton(onClick = it.onClick) { Icon(it.icon, it.label) } }
     onOpenScores?.let {
         IconButton(onClick = it) { Icon(Icons.Rounded.EmojiEvents, stringResource(R.string.vinkit_open_scores)) }
     }

@@ -38,6 +38,7 @@ import io.github.vinaooo.vinkit.core.PhoneViewSide
  * board, controls and toolbar in one phone-wide column on the chosen side. A null [boardAspectRatio] gives the board
  * all of its room, unpadded (Solo: its layout sizes the cards from it and places itself). [sideWidth] is landscape's
  * side columns' width; null fits the info (Solo: its stats), leaving the board more room.
+ * [navigation] adds the game's own screen buttons before Scores and Settings (BattleGrid's badges).
  */
 @Composable
 fun GameFrame(
@@ -51,11 +52,12 @@ fun GameFrame(
     onOpenSettings: (() -> Unit)? = null,
     boardAspectRatio: Float? = 1f,
     sideWidth: Dp? = SIDE_WIDTH,
+    navigation: List<NavigationAction> = emptyList(),
 ) {
     val phoneView = settings.phoneView && LocalConfiguration.current.smallestScreenWidthDp >= TABLET_WIDTH_DP
     val slots =
         Slots(info, board, toolbar, controls, {
-            NavigationButtons(onOpenScores, onOpenSettings)
+            NavigationButtons(onOpenScores, onOpenSettings, navigation)
         }, boardAspectRatio, sideWidth)
     BoxWithConstraints(modifier.fillMaxSize().safeDrawingPadding()) {
         val frame = FrameInfo(

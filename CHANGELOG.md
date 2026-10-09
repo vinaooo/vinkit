@@ -2,6 +2,11 @@
 
 Breaking changes are marked **breaking**: a game must change its code when it bumps `vinkit.tag` past them.
 
+## 0.7.0
+- `shell`: `GameFrame(navigation = listOf(NavigationAction(icon, label) { … }))` adds a game's own screen buttons
+  before Scores and Settings (BattleGrid's badges). `NavigationButtons` takes them too. New last parameter, with a
+  default: existing callers are unchanged.
+
 ## 0.6.0
 - `core`: `Ranking.LOWEST_POINTS`, the fewest points first, then the fastest (BattleGrid: shots to win); `scores`
   stores and shows it like points.

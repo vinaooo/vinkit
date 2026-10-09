@@ -8,6 +8,7 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -68,6 +69,7 @@ class ShellScreenTest {
                     toolbar = { toolbar(it) },
                     onOpenScores = { events += "scores" },
                     onOpenSettings = { events += "settings" },
+                    navigation = listOf(NavigationAction(Icons.Rounded.Star, "Badges") { events += "badges" }),
                 )
             }
         }
@@ -78,11 +80,12 @@ class ShellScreenTest {
         show()
         compose.onNodeWithContentDescription("Easy, Time, 1 minute 5 seconds").assertExists()
         compose.onNodeWithTag("board").assertExists()
+        compose.onNodeWithContentDescription("Badges").performClick()
         compose.onNodeWithContentDescription("Scores").performClick()
         compose.onNodeWithContentDescription("Undo").performClick()
         compose.onNodeWithContentDescription("Redo").performClick()
         compose.onNode(isToggleable()).performClick()
-        events shouldBe listOf("scores", "undo", "notes true")
+        events shouldBe listOf("badges", "scores", "undo", "notes true")
     }
 
     @Test
