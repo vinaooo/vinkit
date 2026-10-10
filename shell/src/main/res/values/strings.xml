@@ -12,4 +12,5 @@
     <string name="vinkit_hint">Hint</string>
     <string name="vinkit_undone">Move undone</string>
     <string name="vinkit_redone">Move redone</string>
+    <string name="vinkit_restart">Restart this game</string>
 </resources>

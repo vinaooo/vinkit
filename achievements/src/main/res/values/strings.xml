@@ -2,4 +2,23 @@
     <string name="vinkit_badges">Badges</string>
     <string name="vinkit_badge_locked">%1$s, locked: %2$s</string>
     <string name="vinkit_badge_unlocked">%1$s, earned: %2$s</string>
+    <string name="vinkit_new_badge">New badge: %1$s</string>
+    <plurals name="vinkit_new_badges">
+        <item quantity="one">%d new badge</item>
+        <item quantity="other">%d new badges</item>
+    </plurals>
+    <!-- Badge names shared by the games: ladders (games played, wins, wins in a row) and a win without hints. -->
+    <plurals name="vinkit_badge_played">
+        <item quantity="one">%d game played</item>
+        <item quantity="other">%d games played</item>
+    </plurals>
+    <plurals name="vinkit_badge_won">
+        <item quantity="one">%d win</item>
+        <item quantity="other">%d wins</item>
+    </plurals>
+    <plurals name="vinkit_badge_streak">
+        <item quantity="one">%d win in a row</item>
+        <item quantity="other">%d wins in a row</item>
+    </plurals>
+    <string name="vinkit_badge_no_hints">On your own</string>
 </resources>

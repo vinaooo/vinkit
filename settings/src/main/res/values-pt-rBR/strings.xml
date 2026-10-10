@@ -2,7 +2,7 @@
     <string name="vinkit_settings_title">Configurações</string>
     <string name="vinkit_section_appearance">Aparência</string>
     <string name="vinkit_section_feedback">Sons e vibração</string>
-    <string name="vinkit_new_game_confirm_text">Isso vai começar um novo jogo. O jogo atual conta como derrota.</string>
+    <string name="vinkit_new_game_confirm_text">Isso vai começar uma nova partida. A partida atual conta como derrota.</string>
     <string name="vinkit_new_game_confirm">Confirmar</string>
     <string name="vinkit_new_game_cancel">Cancelar</string>
     <string name="vinkit_phone_view">Visão de celular</string>
@@ -29,4 +29,5 @@
     <string name="vinkit_board_alignment">Posição do tabuleiro</string>
     <string name="vinkit_board_top">Em cima</string>
     <string name="vinkit_board_bottom">Embaixo</string>
+    <string name="vinkit_section_game">Jogo</string>
 </resources>

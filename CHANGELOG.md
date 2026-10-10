@@ -2,6 +2,14 @@
 
 Breaking changes are marked **breaking**: a game must change its code when it bumps `vinkit.tag` past them.
 
+## 0.9.0
+- PT-BR wording follows the shared glossary (`../GLOSSARY.md`): `vinkit_new_game` "Nova partida", the new-game
+  confirm text says "partida", and the bug report says "problema" (`vinkit_report_bug`, `_body`, `_subject`). No key
+  changed.
+- Shared strings the games used to copy: `designsystem` `vinkit_difficulty` and `vinkit_difficulty_easy`/`_medium`/
+  `_hard`; `settings` `vinkit_section_game`; `shell` `vinkit_restart`; `achievements` `vinkit_new_badge`, plurals
+  `vinkit_new_badges`, `vinkit_badge_played`/`_won`/`_streak`, and `vinkit_badge_no_hints`.
+
 ## 0.8.0
 - `core`: `AchievementProgress` (badges earned and collected sets, by the game's own string keys) and
   `AchievementRepository`; `unlock { rules }` returns the badges just earned. The rules stay in the game.

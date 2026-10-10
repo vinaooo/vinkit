@@ -22,4 +22,8 @@
         <item quantity="one">%1$d segundo</item>
         <item quantity="other">%1$d segundos</item>
     </plurals>
+    <string name="vinkit_difficulty">Dificuldade</string>
+    <string name="vinkit_difficulty_easy">Fácil</string>
+    <string name="vinkit_difficulty_medium">Médio</string>
+    <string name="vinkit_difficulty_hard">Difícil</string>
 </resources>

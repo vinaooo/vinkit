@@ -29,4 +29,5 @@
     <string name="vinkit_board_alignment">Board position</string>
     <string name="vinkit_board_top">Top</string>
     <string name="vinkit_board_bottom">Bottom</string>
+    <string name="vinkit_section_game">Game</string>
 </resources>
